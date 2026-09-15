@@ -29,7 +29,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-[#12151b] text-[#f0f2f5]">
       <main className="w-full">
         {children}
       </main>
