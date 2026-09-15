@@ -14,8 +14,10 @@ import {
   CheckCheck,
   Search,
   Sparkles,
-  Inbox
+  Inbox,
+  ShieldCheck
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Mensaje {
   _id?: string;
@@ -66,7 +68,7 @@ export default function MensajesPanelPage() {
       } catch {}
     }
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5001';
     const socketClient = io(socketUrl, {
       transports: ['websocket', 'polling']
     });
@@ -79,7 +81,7 @@ export default function MensajesPanelPage() {
         if (res && res.length > 0) {
           seleccionarConversacion(res[0], socketClient);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error cargando conversaciones:', err);
       } finally {
         setLoading(false);
@@ -93,7 +95,6 @@ export default function MensajesPanelPage() {
         if (prev.some((m) => m._id === msg._id)) return prev;
         return [...prev, msg];
       });
-      // Actualizar último mensaje en la lista
       setConversaciones((prev) =>
         prev.map((c) =>
           c._id === msg.conversacionId
@@ -105,7 +106,7 @@ export default function MensajesPanelPage() {
     });
 
     return () => {
-      if (socketClient) socketClient.disconnect();
+      socketClient.disconnect();
     };
   }, []);
 
@@ -148,7 +149,7 @@ export default function MensajesPanelPage() {
         setMensajes((prev) => [...prev, res]);
       }
     } catch (err: any) {
-      alert('Error enviando mensaje: ' + err.message);
+      toast.error('Error enviando mensaje: ' + err.message);
     }
   };
 
@@ -165,62 +166,61 @@ export default function MensajesPanelPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Top Breadcrumb navigation */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Top Breadcrumb */}
       <div className="mb-6 flex items-center justify-between">
         <Link 
           href="/panel" 
-          className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors group"
+          className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors group"
         >
-          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-          <span>Volver al Panel de Gestión</span>
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span>Volver al Panel Principal</span>
         </Link>
-        <span className="text-xs text-slate-400 font-medium">Bandeja de Mensajería Omnicanal</span>
+        <span className="text-xs text-slate-500 font-semibold">Bandeja Omnicanal en Vivo</span>
       </div>
 
       {/* Main Messenger Box */}
-      <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200/80 overflow-hidden flex flex-col md:flex-row h-[700px]">
+      <div className="bg-slate-900/80 rounded-3xl shadow-2xl border border-white/10 overflow-hidden flex flex-col md:flex-row h-[720px] backdrop-blur-xl">
         {/* Sidebar */}
-        <div className="w-full md:w-88 border-r border-slate-100 flex flex-col h-full bg-slate-50/50">
-          <div className="p-5 border-b border-slate-100 bg-white">
+        <div className="w-full md:w-88 border-r border-white/5 flex flex-col h-full bg-slate-950/40">
+          <div className="p-5 border-b border-white/5 bg-slate-950/60">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold">
                   <MessageSquare className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900 tracking-tight">Consultas de Clientes</h2>
-                  <p className="text-[11px] text-slate-400">Interacciones en tiempo real</p>
+                  <h2 className="text-sm font-bold text-white tracking-tight">Consultas de Clientes</h2>
+                  <p className="text-[11px] text-slate-400">Interacciones en vivo</p>
                 </div>
               </div>
-              <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full border border-slate-200">
+              <span className="px-2 py-0.5 bg-white/5 text-slate-300 text-[10px] font-bold rounded-full border border-white/10">
                 {conversaciones.length}
               </span>
             </div>
 
-            {/* Search filter in conversations */}
             <div className="relative">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Filtrar por cliente o comercio..."
+                placeholder="Filtrar por cliente o local..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                className="w-full pl-8 pr-3 py-1.5 bg-slate-900 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
               />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100/80">
+          <div className="flex-1 overflow-y-auto divide-y divide-white/5">
             {loading ? (
-              <div className="p-8 text-center text-xs text-slate-400">
-                Cargando conversaciones activas...
+              <div className="p-8 text-center text-xs text-slate-500">
+                Cargando bandeja de entrada...
               </div>
             ) : filteredConversaciones.length === 0 ? (
-              <div className="p-8 text-center flex flex-col items-center justify-center h-48 text-slate-400">
-                <Inbox className="w-8 h-8 text-slate-300 mb-2 stroke-[1.5]" />
-                <p className="text-xs font-semibold text-slate-600">No hay consultas registradas</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Los vecinos aparecerán aquí cuando hagan preguntas.</p>
+              <div className="p-8 text-center flex flex-col items-center justify-center h-48 text-slate-500">
+                <Inbox className="w-8 h-8 text-slate-600 mb-2 stroke-[1.5]" />
+                <p className="text-xs font-semibold text-slate-300">Sin consultas registradas</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Los vecinos aparecerán aquí al chatear.</p>
               </div>
             ) : (
               filteredConversaciones.map((conv) => {
@@ -233,33 +233,33 @@ export default function MensajesPanelPage() {
                     onClick={() => seleccionarConversacion(conv)}
                     className={`w-full text-left p-4 transition-all flex items-start space-x-3.5 ${
                       isActive 
-                        ? 'bg-indigo-50/70 border-l-4 border-l-indigo-600 shadow-xs' 
-                        : 'hover:bg-slate-100/60'
+                        ? 'bg-indigo-600/20 border-l-4 border-l-indigo-500' 
+                        : 'hover:bg-white/5'
                     }`}
                   >
                     <div className="relative flex-shrink-0">
                       <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white font-black flex items-center justify-center text-sm shadow-sm">
                         {nombreCliente.charAt(0).toUpperCase()}
                       </div>
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+                      <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 border-2 border-slate-950 rounded-full"></span>
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline mb-0.5">
-                        <h4 className="text-xs font-bold text-slate-900 truncate tracking-tight">{nombreCliente}</h4>
-                        <span className="text-[10px] text-slate-400 flex-shrink-0 font-medium">
+                        <h4 className="text-xs font-bold text-white truncate">{nombreCliente}</h4>
+                        <span className="text-[10px] text-slate-500 flex-shrink-0 font-medium">
                           {conv.fechaUltimoMensaje
                             ? new Date(conv.fechaUltimoMensaje).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                             : ''}
                         </span>
                       </div>
                       
-                      <div className="flex items-center space-x-1 text-[11px] text-indigo-600 font-semibold truncate mb-1">
+                      <div className="flex items-center space-x-1 text-[11px] text-indigo-400 font-semibold truncate mb-1">
                         <Store className="w-3 h-3 flex-shrink-0" />
                         <span className="truncate">{conv.comercioId?.nombre}</span>
                       </div>
 
-                      <p className="text-xs text-slate-500 truncate font-normal">
+                      <p className="text-xs text-slate-400 truncate font-normal">
                         {conv.ultimoMensaje || 'Sin mensajes recientes'}
                       </p>
                     </div>
@@ -271,49 +271,49 @@ export default function MensajesPanelPage() {
         </div>
 
         {/* Active Chat Conversation Pane */}
-        <div className="flex-1 flex flex-col h-full bg-white">
+        <div className="flex-1 flex flex-col h-full bg-slate-900/60">
           {conversacionActiva ? (
             <>
               {/* Header */}
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+              <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-slate-950/60">
                 <div className="flex items-center space-x-3.5">
                   <div className="relative">
-                    <div className="w-11 h-11 rounded-2xl bg-slate-900 text-white font-black flex items-center justify-center text-base shadow-sm">
+                    <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white font-black flex items-center justify-center text-base shadow-md">
                       {getInterlocutor(conversacionActiva).charAt(0).toUpperCase()}
                     </div>
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-slate-950 rounded-full"></span>
                   </div>
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-bold text-sm text-slate-900">
+                      <h3 className="font-bold text-sm text-white">
                         {getInterlocutor(conversacionActiva)}
                       </h3>
-                      <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200">
-                        Vecino
+                      <span className="text-[10px] font-bold bg-white/5 text-slate-300 px-2 py-0.5 rounded-md border border-white/10">
+                        Vecino de Bahía Blanca
                       </span>
                     </div>
-                    <div className="flex items-center space-x-1.5 text-xs text-slate-500 mt-0.5">
-                      <span>Interesado en:</span>
-                      <span className="font-bold text-slate-800">{conversacionActiva.comercioId?.nombre}</span>
+                    <div className="flex items-center space-x-1.5 text-xs text-slate-400 mt-0.5">
+                      <span>Consulta sobre:</span>
+                      <span className="font-bold text-indigo-300">{conversacionActiva.comercioId?.nombre}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <span className="inline-flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-100">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                  <span className="inline-flex items-center space-x-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-semibold rounded-full border border-emerald-500/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                     <span>Canal Activo</span>
                   </span>
                 </div>
               </div>
 
               {/* Messages Body */}
-              <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/40">
+              <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-950/30">
                 {mensajes.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2">
+                  <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-2">
                     <Sparkles className="w-8 h-8 text-indigo-400 stroke-[1.5]" />
-                    <p className="text-xs font-semibold text-slate-600">Inicia la conversación</p>
-                    <p className="text-[11px] text-slate-400">Responde con amabilidad y brinda detalles sobre tus productos o servicios.</p>
+                    <p className="text-xs font-semibold text-slate-300">Inicia la conversación</p>
+                    <p className="text-[11px] text-slate-500">Responde con amabilidad sobre precios o stock.</p>
                   </div>
                 ) : (
                   mensajes.map((m, idx) => {
@@ -326,14 +326,14 @@ export default function MensajesPanelPage() {
                         key={m._id || idx}
                         className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}
                       >
-                        <span className="text-[10px] text-slate-400 mb-1 px-1 font-medium">
+                        <span className="text-[10px] text-slate-500 mb-1 px-1 font-medium">
                           {esMio ? 'Tú (Comercio)' : nombreEmisor}
                         </span>
                         <div
                           className={`max-w-[75%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-sm ${
                             esMio
                               ? 'bg-indigo-600 text-white rounded-br-xs'
-                              : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
+                              : 'bg-slate-800 text-slate-200 border border-white/5 rounded-bl-xs'
                           }`}
                         >
                           <p className="whitespace-pre-wrap break-words">{m.contenido}</p>
@@ -358,32 +358,32 @@ export default function MensajesPanelPage() {
               </div>
 
               {/* Compose Message Bar */}
-              <form onSubmit={handleEnviar} className="p-4 border-t border-slate-100 bg-white flex items-center space-x-2">
+              <form onSubmit={handleEnviar} className="p-4 border-t border-white/5 bg-slate-950/60 flex items-center space-x-2">
                 <input
                   type="text"
                   placeholder="Escribe tu respuesta al vecino..."
                   value={nuevoMensaje}
                   onChange={(e) => setNuevoMensaje(e.target.value)}
-                  className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all"
+                  className="flex-1 px-4 py-3 bg-slate-900 border border-white/10 rounded-2xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
                 />
                 <button
                   type="submit"
                   disabled={!nuevoMensaje.trim()}
-                  className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold rounded-2xl text-xs shadow-md shadow-indigo-600/20 transition-all flex items-center space-x-2"
+                  className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-bold rounded-2xl text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center space-x-2"
                 >
-                  <span>Enviar</span>
+                  <span>Responder</span>
                   <Send className="w-3.5 h-3.5" />
                 </button>
               </form>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-400 space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-500 space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-slate-400">
                 <MessageSquare className="w-7 h-7 stroke-[1.5]" />
               </div>
-              <p className="text-sm font-bold text-slate-700">Selecciona una conversación</p>
+              <p className="text-sm font-bold text-white">Selecciona una conversación</p>
               <p className="text-xs text-slate-400 max-w-sm">
-                Podrás responder consultas de precios, horarios y disponibilidad con tus clientes vecinos en tiempo real.
+                Podrás responder consultas de precios, horarios y disponibilidad de tus vidrieras en tiempo real.
               </p>
             </div>
           )}

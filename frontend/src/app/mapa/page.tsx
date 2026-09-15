@@ -4,7 +4,17 @@ import { useState, useEffect } from 'react';
 import { fetchAPI } from '@/lib/api';
 import MapaComercios from '@/components/MapaComercios';
 import Link from 'next/link';
-import { MapPin, Store, Search, Filter, Phone, Star, ChevronRight, Building2 } from 'lucide-react';
+import { 
+  MapPin, 
+  Store, 
+  Search, 
+  Star, 
+  ArrowRight, 
+  Phone, 
+  ShieldCheck, 
+  Navigation,
+  Compass
+} from 'lucide-react';
 
 export default function MapaPage() {
   const [comercios, setComercios] = useState<any[]>([]);
@@ -12,6 +22,7 @@ export default function MapaPage() {
   const [filtroTexto, setFiltroTexto] = useState('');
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('');
   const [categorias, setCategorias] = useState<any[]>([]);
+  const [selectedCenter, setSelectedCenter] = useState<[number, number]>([-38.7183, -62.2642]);
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -43,118 +54,140 @@ export default function MapaPage() {
     return matchTexto && matchCat;
   });
 
+  const handleFocusComercio = (c: any) => {
+    if (c.ubicacion?.coordinates) {
+      // In GeoJSON: [longitude, latitude]. In Leaflet: [latitude, longitude]
+      setSelectedCenter([c.ubicacion.coordinates[1], c.ubicacion.coordinates[0]]);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Page Header */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold uppercase tracking-wider mb-2">
-            <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Cartografía Abierta Municipal</span>
+      {/* Header Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-white/10 p-8 sm:p-10 mb-8 shadow-2xl backdrop-blur-xl">
+        <div className="max-w-2xl">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-bold uppercase tracking-wider mb-3">
+            <Compass className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Cartografía Abierta y Georreferenciación Municipal</span>
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Mapa Interactivo de Comercios
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-normal mt-1">
-            Localiza los establecimientos comerciales georreferenciados en la ciudad sobre OpenStreetMap.
+          <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Explora las vidrieras comerciales habilitadas de Bahía Blanca en el mapa interactivo. Selecciona cualquier comercio para ubicarlo al instante.
           </p>
-        </div>
-
-        {/* Category Filter Selector */}
-        <div className="flex items-center space-x-2 self-start md:self-auto">
-          <Filter className="w-3.5 h-3.5 text-slate-400" />
-          <select
-            value={categoriaSeleccionada}
-            onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-            className="px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold bg-white text-slate-700 shadow-2xs focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 focus:outline-none"
-          >
-            <option value="">Todas las Categorías</option>
-            {categorias.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.nombre}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
-      {/* Grid: Map + Sidebar Explorer */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Map View */}
-        <div className="lg:col-span-2">
-          {loading ? (
-            <div className="w-full h-[600px] bg-slate-100 rounded-2xl animate-pulse flex flex-col items-center justify-center text-slate-400 text-xs">
-              <div className="w-8 h-8 border-3 border-slate-200 border-t-slate-800 rounded-full animate-spin mb-3"></div>
-              <span>Cargando mapa interactivo...</span>
-            </div>
-          ) : (
-            <MapaComercios comercios={comerciosFiltrados} />
-          )}
-        </div>
-
-        {/* Sidebar Store Drawer */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 flex flex-col h-[600px] shadow-xs">
-          <div className="mb-3">
+      {/* Main Split Interface */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left 5 Cols: Search & Interactive List */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="p-5 rounded-3xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-xl space-y-3">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Filtrar por nombre o calle..."
+                placeholder="Filtrar por comercio o calle..."
                 value={filtroTexto}
                 onChange={(e) => setFiltroTexto(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 focus:outline-none transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-white/10 rounded-2xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
               />
             </div>
-            <div className="flex justify-between items-center mt-2 px-1 text-[11px] text-slate-400 font-medium">
-              <span>{comerciosFiltrados.length} locales en pantalla</span>
-              {categoriaSeleccionada && (
+
+            {/* Category selection */}
+            {categorias.length > 0 && (
+              <div className="flex items-center space-x-2 overflow-x-auto pb-1 text-xs">
                 <button
                   onClick={() => setCategoriaSeleccionada('')}
-                  className="text-indigo-600 hover:underline font-semibold"
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex-shrink-0 ${
+                    categoriaSeleccionada === ''
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                      : 'bg-white/5 text-slate-400 hover:text-white'
+                  }`}
                 >
-                  Restablecer
+                  Todos ({comercios.length})
                 </button>
-              )}
-            </div>
+                {categorias.map((cat) => (
+                  <button
+                    key={cat._id}
+                    onClick={() => setCategoriaSeleccionada(cat._id)}
+                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex-shrink-0 ${
+                      categoriaSeleccionada === cat._id
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                        : 'bg-white/5 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {cat.nombre}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
-            {comerciosFiltrados.length === 0 ? (
-              <div className="text-center py-16 text-slate-400 text-xs font-normal">
-                No se encontraron locales para los filtros seleccionados.
+          {/* Store List */}
+          <div className="space-y-3 max-h-[580px] overflow-y-auto pr-1">
+            {loading ? (
+              <div className="p-10 text-center text-slate-400 text-xs font-semibold">
+                Cargando mapa y puntos comerciales...
+              </div>
+            ) : comerciosFiltrados.length === 0 ? (
+              <div className="p-8 text-center text-slate-500 text-xs rounded-2xl bg-slate-900/50 border border-white/5">
+                No hay comercios que coincidan con la búsqueda.
               </div>
             ) : (
-              comerciosFiltrados.map((c) => (
+              comerciosFiltrados.map((comercio) => (
                 <div
-                  key={c._id}
-                  className="p-3.5 border border-slate-100 rounded-xl bg-slate-50/60 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                  key={comercio._id}
+                  onClick={() => handleFocusComercio(comercio)}
+                  className="p-4 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-cyan-500/40 transition-all shadow-md backdrop-blur-xl cursor-pointer group"
                 >
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-bold text-xs text-slate-900 line-clamp-1">{c.nombre}</h3>
-                    <span className="flex items-center text-[11px] font-bold text-slate-800 ml-2 flex-shrink-0">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400 mr-1" />
-                      {c.calificacionPromedio > 0 ? c.calificacionPromedio.toFixed(1) : 'Nuevo'}
-                    </span>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
+                        {comercio.nombre}
+                      </h4>
+                      <div className="flex items-center space-x-1.5 text-xs text-slate-400 mt-1">
+                        <MapPin className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                        <span className="truncate max-w-[220px]">{comercio.direccion || 'Bahía Blanca'}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-1 text-amber-400 text-xs font-bold">
+                      <Star className="w-3 h-3 fill-amber-400" />
+                      <span>{comercio.calificacionPromedio ? comercio.calificacionPromedio.toFixed(1) : 'Nuevo'}</span>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-slate-500 flex items-center mb-2.5 font-normal">
-                    <MapPin className="w-3 h-3 text-slate-400 mr-1 flex-shrink-0" />
-                    <span className="truncate">{c.direccion || 'Sin dirección'}</span>
-                  </p>
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[11px]">
-                    <span className="text-slate-400">
-                      {c.contacto?.telefono || 'Disponible online'}
+
+                  <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
+                    <span className="text-[10px] text-cyan-400 font-semibold flex items-center space-x-1">
+                      <Navigation className="w-3 h-3" />
+                      <span>Centrar en mapa</span>
                     </span>
+
                     <Link
-                      href={`/comercio/${c._id}`}
-                      className="font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-0.5"
+                      href={`/comercio/${comercio._id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-xs transition-all flex items-center space-x-1"
                     >
-                      <span>Ver vidriera</span>
-                      <ChevronRight className="w-3 h-3" />
+                      <span>Ver Vidriera</span>
+                      <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 </div>
               ))
             )}
+          </div>
+        </div>
+
+        {/* Right 7 Cols: Map View */}
+        <div className="lg:col-span-7 rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-slate-900 relative">
+          <div className="h-[680px] w-full">
+            <MapaComercios
+              comercios={comerciosFiltrados}
+              centro={selectedCenter}
+              zoom={14}
+            />
           </div>
         </div>
       </div>

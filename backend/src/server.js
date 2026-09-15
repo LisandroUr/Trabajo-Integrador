@@ -50,8 +50,21 @@ app.get('/', (req, res) => {
 // Inicializar sockets de chat en tiempo real
 initChatSocket(io);
 
-const PORT = process.env.PORT || 5000;
+const DEFAULT_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5001;
 
-server.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+function startServer(portToTry) {
+  server.listen(portToTry, '0.0.0.0', () => {
+    console.log(`Servidor corriendo en el puerto ${portToTry}`);
+  });
+}
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE' || err.code === 'EACCES') {
+    console.warn(`Puerto ocupado o bloqueado por el sistema (${err.code}). Probando puerto alternativo 5001...`);
+    startServer(5001);
+  } else {
+    throw err;
+  }
 });
+
+startServer(DEFAULT_PORT);

@@ -3,7 +3,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { fetchAPI } from '@/lib/api';
-import { MessageSquare, Send, X, Store, CheckCheck, Sparkles, ShieldCheck } from 'lucide-react';
+import { 
+  MessageSquare, 
+  Send, 
+  X, 
+  User, 
+  Store, 
+  Clock, 
+  CheckCheck,
+  Sparkles,
+  ShieldCheck
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Mensaje {
   _id?: string;
@@ -53,7 +64,7 @@ export default function ChatWidget({
       }
     }
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5001';
     const socketClient = io(socketUrl, {
       transports: ['websocket', 'polling']
     });
@@ -71,10 +82,11 @@ export default function ChatWidget({
 
         socketClient.emit('join_conversation', convRes._id);
 
-        const data = await fetchAPI(`/conversaciones/${convRes._id}/mensajes`);
-        setMensajes(data.mensajes || []);
-      } catch (err) {
+        const msgRes = await fetchAPI(`/conversaciones/${convRes._id}/mensajes`);
+        setMensajes(msgRes.mensajes || []);
+      } catch (err: any) {
         console.error('Error inicializando chat:', err);
+        toast.error('Inicia sesión para chatear con el comerciante');
       } finally {
         setLoading(false);
       }
@@ -91,9 +103,7 @@ export default function ChatWidget({
     });
 
     return () => {
-      if (socketClient) {
-        socketClient.disconnect();
-      }
+      socketClient.disconnect();
     };
   }, [isOpen, comercioId]);
 
@@ -108,12 +118,6 @@ export default function ChatWidget({
     const contenido = nuevoMensaje.trim();
     setNuevoMensaje('');
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Debes iniciar sesión con tu cuenta para enviar mensajes al comercio.');
-      return;
-    }
-
     try {
       if (socket && socket.connected) {
         socket.emit('send_message', {
@@ -122,97 +126,95 @@ export default function ChatWidget({
           contenido
         });
       } else {
-        const guardado = await fetchAPI(`/conversaciones/${conversacion._id}/mensajes`, {
+        const res = await fetchAPI(`/conversaciones/${conversacion._id}/mensajes`, {
           method: 'POST',
           body: JSON.stringify({ contenido })
         });
-        setMensajes((prev) => [...prev, guardado]);
+        setMensajes((prev) => [...prev, res]);
       }
     } catch (err: any) {
-      alert('Error enviando mensaje: ' + err.message);
+      toast.error('Error enviando mensaje: ' + err.message);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 w-96 max-w-[calc(100vw-2.5rem)] h-[520px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 flex flex-col z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200">
-      {/* Top Header */}
-      <div className="bg-slate-900 text-white px-4 py-3.5 flex items-center justify-between">
+    <div className="fixed bottom-6 right-6 z-50 w-full max-w-[390px] h-[540px] bg-slate-950/95 border border-white/15 rounded-3xl shadow-2xl backdrop-blur-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+      {/* Header */}
+      <div className="px-5 py-4 bg-gradient-to-r from-slate-900 to-indigo-950 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="relative">
-            <div className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-200">
-              <Store className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-md shadow-indigo-600/30">
+              <Store className="w-5 h-5" />
             </div>
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-900"></span>
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-slate-950 rounded-full"></span>
           </div>
+
           <div>
-            <div className="flex items-center space-x-1.5">
-              <h3 className="font-bold text-xs text-white leading-tight">{comercioNombre}</h3>
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+            <h4 className="text-xs font-bold text-white max-w-[180px] truncate">
+              {comercioNombre}
+            </h4>
+            <div className="flex items-center space-x-1.5 text-[10px] text-emerald-400 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Canal directo en vivo</span>
             </div>
-            <span className="text-[10px] text-slate-400 font-medium">Canal de atención directa</span>
           </div>
         </div>
+
         <button
           onClick={onClose}
-          className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-          aria-label="Cerrar chat"
+          className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Message Stream */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/70">
+      {/* Messages Scroll Area */}
+      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-950/40">
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-full text-xs text-slate-400 space-y-2">
-            <div className="w-5 h-5 border-2 border-slate-300 border-t-indigo-600 rounded-full animate-spin"></div>
-            <span>Conectando con el comercio...</span>
+          <div className="flex flex-col items-center justify-center h-full text-slate-500 text-xs">
+            <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+            <span>Conectando sala segura...</span>
           </div>
         ) : mensajes.length === 0 ? (
-          <div className="text-center py-12 px-4">
-            <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mx-auto mb-3">
-              <MessageSquare className="w-5 h-5" />
-            </div>
-            <h4 className="text-xs font-bold text-slate-800">Inicia tu consulta</h4>
-            <p className="text-[11px] text-slate-500 mt-1 max-w-[200px] mx-auto leading-relaxed">
-              Pregunta por disponibilidad de productos, formas de pago o envíos a domicilio.
+          <div className="flex flex-col items-center justify-center h-full text-slate-500 text-center px-6">
+            <Sparkles className="w-8 h-8 text-indigo-400 mb-2 stroke-[1.5]" />
+            <p className="text-xs font-bold text-white">Haz una consulta al comerciante</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Pregunta por disponibilidad de stock, medios de pago o reservas de productos.
             </p>
           </div>
         ) : (
           mensajes.map((m, idx) => {
             const emisorId = typeof m.emisorId === 'object' ? m.emisorId?._id : m.emisorId;
             const esMio = currentUser?._id && emisorId === currentUser._id;
-            const emisorNombre = typeof m.emisorId === 'object' ? m.emisorId?.nombre : 'Comercio';
+            const nombreEmisor = typeof m.emisorId === 'object' ? m.emisorId?.nombre : 'Usuario';
 
             return (
               <div
                 key={m._id || idx}
                 className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}
               >
-                {!esMio && (
-                  <span className="text-[10px] font-semibold text-slate-500 mb-1 ml-1">
-                    {emisorNombre}
-                  </span>
-                )}
+                <span className="text-[9px] text-slate-500 mb-1 px-1 font-medium">
+                  {esMio ? 'Tú' : nombreEmisor}
+                </span>
                 <div
-                  className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-2xs ${
+                  className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-sm ${
                     esMio
-                      ? 'bg-slate-900 text-white rounded-br-xs'
-                      : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
+                      ? 'bg-indigo-600 text-white rounded-br-xs'
+                      : 'bg-slate-800 text-slate-200 border border-white/5 rounded-bl-xs'
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{m.contenido}</p>
-                  <span
-                    className={`text-[9px] block text-right mt-1 font-medium ${
-                      esMio ? 'text-slate-400' : 'text-slate-400'
-                    }`}
-                  >
-                    {m.createdAt
-                      ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                      : 'Ahora'}
-                  </span>
+                  <div className="text-[9px] flex items-center justify-end space-x-1 mt-1 font-medium text-slate-400">
+                    <span>
+                      {m.createdAt
+                        ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : 'Ahora'}
+                    </span>
+                    {esMio && <CheckCheck className="w-3 h-3 text-indigo-300" />}
+                  </div>
                 </div>
               </div>
             );
@@ -221,19 +223,19 @@ export default function ChatWidget({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input Box */}
-      <form onSubmit={handleEnviar} className="p-3 bg-white border-t border-slate-200/80 flex items-center space-x-2">
+      {/* Input Bar */}
+      <form onSubmit={handleEnviar} className="p-3 border-t border-white/10 bg-slate-900/90 flex items-center space-x-2">
         <input
           type="text"
-          placeholder="Escribe un mensaje..."
+          placeholder="Escribe tu mensaje..."
           value={nuevoMensaje}
           onChange={(e) => setNuevoMensaje(e.target.value)}
-          className="flex-1 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 focus:outline-none transition-all"
+          className="flex-1 px-3.5 py-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
         />
         <button
           type="submit"
           disabled={!nuevoMensaje.trim()}
-          className="p-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white rounded-xl shadow-xs transition-colors flex items-center justify-center flex-shrink-0"
+          className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center"
         >
           <Send className="w-3.5 h-3.5" />
         </button>

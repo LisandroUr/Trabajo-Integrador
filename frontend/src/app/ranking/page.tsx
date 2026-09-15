@@ -1,320 +1,411 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { fetchAPI } from '@/lib/api';
 import Link from 'next/link';
 import { 
-  TrendingUp, 
+  BarChart3, 
+  TrendingDown, 
   Search, 
-  Tag, 
   Store, 
-  MapPin, 
-  ArrowUpDown, 
-  Trophy, 
-  DollarSign, 
-  Percent, 
-  AlertCircle,
-  Building2,
-  CheckCircle2,
-  ChevronRight,
-  SlidersHorizontal,
-  Star,
-  ExternalLink
+  ArrowUpRight, 
+  Filter, 
+  ArrowUpDown,
+  DollarSign,
+  Award,
+  Sparkles,
+  PieChart as PieChartIcon,
+  ChevronRight
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend
+} from 'recharts';
 
-interface ProductoRanking {
-  _id: string;
+interface ItemRanking {
   nombre: string;
-  descripcion: string;
-  precio: number;
-  categoria?: {
-    _id: string;
-    nombre: string;
-    icono: string;
-  };
-  comercioId: {
-    _id: string;
-    nombre: string;
-    direccion: string;
-    calificacionPromedio: number;
-    contacto?: {
-      telefono?: string;
-      whatsapp?: string;
-    };
-  };
-}
-
-interface Estadisticas {
-  totalOfertas: number;
-  precioMinimo: number;
-  precioMaximo: number;
+  categoria: string;
+  precioMin: number;
+  precioMax: number;
   precioPromedio: number;
-  ahorroMaximo: number;
-  porcentajeAhorro: number;
+  ahorroPorcentaje: number;
+  mejorComercio: {
+    _id: string;
+    nombre: string;
+    direccion?: string;
+  };
+  comerciosTotal: number;
+  todosPrecios: Array<{
+    comercioId: string;
+    nombreComercio: string;
+    precio: number;
+    disponible: boolean;
+  }>;
 }
 
 export default function RankingPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [orden, setOrden] = useState<'asc' | 'desc'>('asc');
-  const [productos, setProductos] = useState<ProductoRanking[]>([]);
-  const [estadisticas, setEstadisticas] = useState<Estadisticas | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [ranking, setRanking] = useState<ItemRanking[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  const sugerencias = ['Leche', 'Pan', 'Aceite', 'Harina', 'Café', 'Paracetamol'];
-
-  const buscarRanking = async (termino: string, ordenActual: 'asc' | 'desc' = orden) => {
-    setLoading(true);
-    setError('');
-    try {
-      const url = `/productos/ranking?q=${encodeURIComponent(termino)}&orden=${ordenActual}&limit=50`;
-      const res = await fetchAPI(url);
-      setProductos(res.productos || []);
-      setEstadisticas(res.estadisticas || null);
-    } catch (err: any) {
-      setError(err.message || 'Error al consultar el observatorio de precios');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategoria, setSelectedCategoria] = useState('todas');
+  const [sortBy, setSortBy] = useState<'ahorro' | 'precio' | 'nombre'>('ahorro');
+  const [viewMode, setViewMode] = useState<'cards' | 'chart'>('cards');
 
   useEffect(() => {
-    buscarRanking('Leche');
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) setSearchTerm(q);
+
+    const loadRanking = async () => {
+      try {
+        const data = await fetchAPI('/productos/ranking');
+        setRanking(data || []);
+      } catch (err: any) {
+        setError(err.message || 'Error cargando datos del observatorio de precios');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRanking();
   }, []);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    buscarRanking(searchTerm);
-  };
+  const categorias = useMemo(() => {
+    const setCat = new Set<string>();
+    ranking.forEach((r) => {
+      if (r.categoria) setCat.add(r.categoria);
+    });
+    return Array.from(setCat);
+  }, [ranking]);
 
-  const handleSugerenciaClick = (sug: string) => {
-    setSearchTerm(sug);
-    buscarRanking(sug);
-  };
+  const filteredItems = useMemo(() => {
+    return ranking
+      .filter((item) => {
+        const matchesName = item.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCat = selectedCategoria === 'todas' || item.categoria === selectedCategoria;
+        return matchesName && matchesCat;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'ahorro') return b.ahorroPorcentaje - a.ahorroPorcentaje;
+        if (sortBy === 'precio') return a.precioMin - b.precioMin;
+        return a.nombre.localeCompare(b.nombre);
+      });
+  }, [ranking, searchTerm, selectedCategoria, sortBy]);
 
-  const toggleOrden = () => {
-    const nuevoOrden = orden === 'asc' ? 'desc' : 'asc';
-    setOrden(nuevoOrden);
-    buscarRanking(searchTerm, nuevoOrden);
-  };
+  // Chart data preparation
+  const chartData = useMemo(() => {
+    return filteredItems.slice(0, 8).map((item) => ({
+      name: item.nombre.length > 14 ? item.nombre.slice(0, 14) + '...' : item.nombre,
+      'Precio Mínimo': item.precioMin,
+      'Precio Promedio': Math.round(item.precioPromedio),
+      'Precio Máximo': item.precioMax,
+    }));
+  }, [filteredItems]);
+
+  const maxAhorro = useMemo(() => {
+    if (ranking.length === 0) return 0;
+    return Math.max(...ranking.map((r) => r.ahorroPorcentaje));
+  }, [ranking]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Header */}
-      <div className="mb-10 max-w-3xl">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold uppercase tracking-wider mb-3">
-          <TrendingUp className="w-3.5 h-3.5 text-indigo-600" />
-          <span>Observatorio de Precios y Transparencia Local</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-          Ranking y Comparador de Precios
-        </h1>
-        <p className="mt-2 text-sm text-slate-500 font-normal leading-relaxed">
-          Consulta la dispersión de precios en tiempo real de los artículos de la canasta básica y ubica las ofertas más convenientes de la ciudad.
-        </p>
-      </div>
-
-      {/* Control Panel: Search & Filters */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs mb-8">
-        <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-            <input
-              type="text"
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 focus:outline-none transition-all"
-              placeholder="¿Qué producto deseas comparar? (Ej. Leche, Pan, Aceite, Café...)"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button
-            type="submit"
-            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs sm:text-sm shadow-xs transition-colors flex items-center justify-center space-x-2"
-          >
-            <Search className="w-4 h-4" />
-            <span>Comparar</span>
-          </button>
-          <button
-            type="button"
-            onClick={toggleOrden}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-semibold rounded-xl text-xs sm:text-sm transition-colors flex items-center justify-center space-x-2 border border-slate-200"
-            title="Alternar criterio de ordenamiento"
-          >
-            <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
-            <span>{orden === 'asc' ? 'Menor precio' : 'Mayor precio'}</span>
-          </button>
-        </form>
-
-        {/* Quick Search Chips */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-slate-500 flex items-center mr-1">
-            <Tag className="w-3.5 h-3.5 mr-1 text-slate-400" />
-            Consultas frecuentes:
-          </span>
-          {sugerencias.map((sug) => (
-            <button
-              key={sug}
-              onClick={() => handleSugerenciaClick(sug)}
-              className="px-3 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 transition-colors"
-            >
-              {sug}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* KPI Stats Widgets */}
-      {estadisticas && estadisticas.totalOfertas > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Mejor Precio</span>
-              <Trophy className="w-4 h-4 text-emerald-600" />
+      {/* Header Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-white/10 p-8 sm:p-12 mb-10 shadow-2xl">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">
+              <BarChart3 className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Observatorio Oficial de Precios de Bahía Blanca</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tabular-nums">
-              ${estadisticas.precioMinimo.toLocaleString('es-AR')}
-            </div>
-            <p className="text-[11px] text-emerald-600 font-semibold mt-1">Opción más económica</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Precio Promedio</span>
-              <DollarSign className="w-4 h-4 text-slate-400" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tabular-nums">
-              ${estadisticas.precioPromedio.toLocaleString('es-AR')}
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1">Media en la ciudad</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Ahorro Potencial</span>
-              <Percent className="w-4 h-4 text-indigo-600" />
-            </div>
-            <div className="text-2xl sm:text-3xl font-black text-indigo-600 font-mono tabular-nums">
-              {estadisticas.porcentajeAhorro}%
-            </div>
-            <p className="text-[11px] text-indigo-600 font-medium mt-1">
-              Hasta ${estadisticas.ahorroMaximo.toLocaleString('es-AR')} menos
+            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+              Ranking & Dispersión de Precios
+            </h1>
+            <p className="mt-3 text-sm text-slate-300 leading-relaxed">
+              Métricas comparativas calculadas automáticamente sobre los catálogos vigentes de los comercios de cercanía registrados.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Muestras</span>
-              <Store className="w-4 h-4 text-slate-400" />
+          <div className="flex items-center space-x-3 bg-slate-900/80 p-2 rounded-2xl border border-white/10 self-start md:self-auto">
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                viewMode === 'cards'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Tarjetas Detalladas
+            </button>
+            <button
+              onClick={() => setViewMode('chart')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                viewMode === 'chart'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <PieChartIcon className="w-3.5 h-3.5" />
+              <span>Gráfico Comparativo</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
+        <div className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Canasta Relevada</span>
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold">
+              <Store className="w-5 h-5" />
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tabular-nums">
-              {estadisticas.totalOfertas}
+          </div>
+          <p className="text-3xl font-black text-white mt-3 tabular-nums">{ranking.length}</p>
+          <p className="text-xs text-slate-400 mt-1">Productos básicos con precios comparados</p>
+        </div>
+
+        <div className="p-6 rounded-3xl bg-slate-900/70 border border-emerald-500/30 shadow-xl backdrop-blur-xl relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Ahorro Máximo</span>
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold">
+              <TrendingDown className="w-5 h-5" />
             </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1">Comercios comparados</p>
+          </div>
+          <p className="text-3xl font-black text-emerald-400 mt-3 tabular-nums">Hasta {maxAhorro}%</p>
+          <p className="text-xs text-slate-400 mt-1">Diferencia entre el comercio más caro y el más barato</p>
+        </div>
+
+        <div className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Criterio Oficial</span>
+            <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-bold">
+              <Award className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-xl font-bold text-white mt-3">Comercio Justo</p>
+          <p className="text-xs text-slate-400 mt-1">Precios reportados directamente por cada negocio</p>
+        </div>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="p-5 rounded-3xl bg-slate-900/80 border border-white/10 mb-8 backdrop-blur-xl shadow-xl space-y-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Filtrar por nombre de producto (ej. Leche, Pan, Café)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-white/10 rounded-2xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+            />
+          </div>
+
+          {/* Sort Selector */}
+          <div className="flex items-center space-x-2">
+            <ArrowUpDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
+            <select
+              value={sortBy}
+              onChange={(e: any) => setSortBy(e.target.value)}
+              className="bg-slate-950/80 border border-white/10 rounded-2xl px-3 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="ahorro">Mayor porcentaje de ahorro</option>
+              <option value="precio">Precio mínimo más bajo</option>
+              <option value="nombre">Orden alfabético A-Z</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Category Pills */}
+        {categorias.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
+            <span className="text-xs text-slate-400 font-semibold mr-1">Categoría:</span>
+            <button
+              onClick={() => setSelectedCategoria('todas')}
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors ${
+                selectedCategoria === 'todas'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white/5 text-slate-400 hover:text-white'
+              }`}
+            >
+              Todas ({ranking.length})
+            </button>
+            {categorias.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategoria(cat)}
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors capitalize ${
+                  selectedCategoria === cat
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white/5 text-slate-400 hover:text-white'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Chart View (Recharts) */}
+      {viewMode === 'chart' && (
+        <div className="p-8 rounded-3xl bg-slate-900/80 border border-white/10 mb-8 shadow-2xl backdrop-blur-xl">
+          <div className="mb-6">
+            <h3 className="text-base font-bold text-white">Dispersión Visual de Precios ($ ARS)</h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Comparación directa del precio mínimo vs precio promedio vs precio máximo en los productos destacados.
+            </p>
+          </div>
+
+          <div className="h-[380px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#0f172a', 
+                    borderColor: 'rgba(255,255,255,0.1)', 
+                    borderRadius: '16px',
+                    color: '#fff',
+                    fontSize: '12px'
+                  }}
+                  formatter={(value: any) => [`$${value}`, '']}
+                />
+                <Legend wrapperStyle={{ paddingTop: '15px' }} />
+                <Bar dataKey="Precio Mínimo" fill="#10b981" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="Precio Promedio" fill="#6366f1" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="Precio Máximo" fill="#f43f5e" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}
 
-      {error && (
-        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 mb-6 flex items-center space-x-3 text-rose-700 text-xs">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Results Ranking Stream */}
+      {/* Cards View */}
       {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-slate-100 rounded-2xl animate-pulse"></div>
-          ))}
+        <div className="p-20 text-center text-slate-400">
+          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-sm font-semibold">Procesando canasta y métricas del observatorio...</p>
         </div>
-      ) : productos.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-xs">
-          <Building2 className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-800">No se registraron ofertas para "{searchTerm}"</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            Prueba buscando con términos como "leche", "aceite", "pan" o "harina".
-          </p>
+      ) : filteredItems.length === 0 ? (
+        <div className="p-16 rounded-3xl bg-slate-900/50 border border-white/5 text-center text-slate-400">
+          <Search className="w-10 h-10 text-slate-500 mx-auto mb-3" />
+          <p className="text-base font-bold text-white">No se encontraron productos coincidentes</p>
+          <p className="text-xs text-slate-400 mt-1">Prueba con otro término de búsqueda o categoría.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {productos.map((prod, index) => {
-            const isBestPrice = index === 0 && orden === 'asc';
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {filteredItems.map((item) => {
+            const diferenciaPesos = item.precioMax - item.precioMin;
+            
             return (
               <div
-                key={prod._id}
-                className={`rounded-2xl p-5 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
-                  isBestPrice
-                    ? 'bg-white border-2 border-emerald-500 shadow-md ring-4 ring-emerald-50'
-                    : 'bg-white border border-slate-200/80 shadow-xs hover:border-slate-300'
-                }`}
+                key={item.nombre}
+                className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 hover:border-indigo-500/40 transition-all shadow-xl backdrop-blur-xl flex flex-col justify-between group"
               >
-                {/* Ranking Position & Product Info */}
-                <div className="flex items-start space-x-4 flex-1">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 font-mono ${
-                    isBestPrice
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600'
-                  }`}>
-                    {`${index + 1}°`}
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <h3 className="text-base font-bold text-slate-900 leading-snug">{prod.nombre}</h3>
-                      {isBestPrice && (
-                        <span className="inline-flex items-center space-x-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                          <Trophy className="w-3 h-3 text-emerald-600" />
-                          <span>Opción Más Económica</span>
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-500 line-clamp-1 mb-2 font-normal">{prod.descripcion}</p>
-
-                    {/* Store Metadata */}
-                    <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-600">
-                      <Link 
-                        href={`/comercio/${prod.comercioId?._id}`}
-                        className="font-bold text-slate-900 hover:text-indigo-600 flex items-center space-x-1"
-                      >
-                        <Store className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{prod.comercioId?.nombre}</span>
-                      </Link>
-
-                      {prod.comercioId?.direccion && (
-                        <span className="flex items-center space-x-1 text-slate-500">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{prod.comercioId?.direccion}</span>
-                        </span>
-                      )}
-
-                      <span className="flex items-center space-x-1 text-slate-700 font-semibold">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                        <span>
-                          {prod.comercioId?.calificacionPromedio > 0 ? prod.comercioId.calificacionPromedio.toFixed(1) : 'Nuevo'}
-                        </span>
+                <div>
+                  {/* Top Bar of Card */}
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                      <span className="px-2.5 py-0.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold uppercase tracking-wide">
+                        {item.categoria || 'Alimento'}
                       </span>
+                      <h3 className="text-lg font-black text-white mt-1.5 group-hover:text-indigo-300 transition-colors">
+                        {item.nombre}
+                      </h3>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Relevado en <strong className="text-slate-200">{item.comerciosTotal} comercios</strong> locales
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-black">
+                        <TrendingDown className="w-3.5 h-3.5" />
+                        <span>Ahorro {item.ahorroPorcentaje}%</span>
+                      </span>
+                      <p className="text-[10px] text-slate-400 mt-1">Ahorras hasta ${diferenciaPesos}</p>
                     </div>
                   </div>
-                </div>
 
-                {/* Pricing & CTA */}
-                <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-0 border-slate-100 gap-3">
-                  <div className="text-left sm:text-right">
-                    <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Precio Unitario</span>
-                    <span className={`text-2xl font-black font-mono tabular-nums ${isBestPrice ? 'text-emerald-600' : 'text-slate-900'}`}>
-                      ${prod.precio.toLocaleString('es-AR')}
-                    </span>
+                  {/* Price Dispersion Meter */}
+                  <div className="my-6 p-4 rounded-2xl bg-slate-950/80 border border-white/5 space-y-2">
+                    <div className="flex justify-between items-center text-xs">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase text-emerald-400 block">Mejor Precio</span>
+                        <span className="text-xl font-black text-white tabular-nums">${item.precioMin}</span>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-[10px] font-bold uppercase text-slate-400 block">Promedio</span>
+                        <span className="text-sm font-bold text-slate-300 tabular-nums">
+                          ${Math.round(item.precioPromedio)}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] font-bold uppercase text-rose-400 block">Precio Máximo</span>
+                        <span className="text-sm font-bold text-slate-400 line-through tabular-nums">
+                          ${item.precioMax}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Visual Range Indicator */}
+                    <div className="relative w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-emerald-400 via-indigo-400 to-rose-400 w-full opacity-80"></div>
+                    </div>
                   </div>
 
-                  <Link
-                    href={`/comercio/${prod.comercioId?._id}`}
-                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors flex items-center space-x-1"
-                  >
-                    <span>Ver vidriera</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
+                  {/* Best Store Callout */}
+                  <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                        <Store className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">
+                          Comercio Recomendado
+                        </span>
+                        <p className="text-xs font-bold text-white">{item.mejorComercio.nombre}</p>
+                        {item.mejorComercio.direccion && (
+                          <p className="text-[10px] text-slate-400 truncate max-w-[200px]">
+                            {item.mejorComercio.direccion}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/comercio/${item.mejorComercio._id}`}
+                      className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center space-x-1"
+                    >
+                      <span>Ver Vidriera</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
+
+                {/* Other stores breakdown */}
+                {item.todosPrecios && item.todosPrecios.length > 1 && (
+                  <div className="mt-4 pt-4 border-t border-white/5 flex flex-wrap gap-2 text-[11px] text-slate-400">
+                    <span className="font-semibold text-slate-500">Otros comercios:</span>
+                    {item.todosPrecios
+                      .filter((c) => c.comercioId !== item.mejorComercio._id)
+                      .map((p) => (
+                        <span key={p.comercioId} className="px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+                          {p.nombreComercio}: <strong className="text-slate-300">${p.precio}</strong>
+                        </span>
+                      ))}
+                  </div>
+                )}
               </div>
             );
           })}
