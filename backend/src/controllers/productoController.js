@@ -112,11 +112,31 @@ const getRankingPrecios = async (req, res) => {
 
 const createProducto = async (req, res) => {
   try {
-    const { comercioId } = req.body;
+    const { comercioId, categoria } = req.body;
     
     // Verificar que el comercio exista
     const comercio = await Comercio.findById(comercioId);
     if (!comercio) return res.status(404).json({ error: 'Comercio no encontrado' });
+
+    if (categoria) {
+      const mongoose = require('mongoose');
+      const Categoria = require('../models/Categoria');
+      if (mongoose.Types.ObjectId.isValid(categoria)) {
+        const catExistente = await Categoria.findById(categoria);
+        if (!catExistente) {
+          delete req.body.categoria;
+        }
+      } else if (typeof categoria === 'string' && categoria.trim()) {
+        const catNombre = categoria.trim();
+        let cat = await Categoria.findOne({ nombre: new RegExp(`^${catNombre}$`, 'i') });
+        if (!cat) {
+          cat = await Categoria.create({ nombre: catNombre });
+        }
+        req.body.categoria = cat._id;
+      } else {
+        delete req.body.categoria;
+      }
+    }
 
     const nuevoProducto = await Producto.create(req.body);
     res.status(201).json(nuevoProducto);
@@ -128,6 +148,25 @@ const createProducto = async (req, res) => {
 const updateProducto = async (req, res) => {
   try {
     const { id } = req.params;
+    const { categoria } = req.body;
+
+    if (categoria) {
+      const mongoose = require('mongoose');
+      const Categoria = require('../models/Categoria');
+      if (!mongoose.Types.ObjectId.isValid(categoria)) {
+        if (typeof categoria === 'string' && categoria.trim()) {
+          const catNombre = categoria.trim();
+          let cat = await Categoria.findOne({ nombre: new RegExp(`^${catNombre}$`, 'i') });
+          if (!cat) {
+            cat = await Categoria.create({ nombre: catNombre });
+          }
+          req.body.categoria = cat._id;
+        } else {
+          delete req.body.categoria;
+        }
+      }
+    }
+
     const producto = await Producto.findByIdAndUpdate(id, req.body, { new: true });
     if (!producto) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json(producto);

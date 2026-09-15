@@ -94,7 +94,11 @@ export default function RankingPage() {
 
         // Si los items ya están agrupados con mejorComercio (formato ItemRanking previo)
         if (rawProducts.length > 0 && rawProducts[0]?.mejorComercio && typeof rawProducts[0].mejorComercio === 'object') {
-          setRanking(rawProducts);
+          const safeRanking = rawProducts.map((item: any) => ({
+            ...item,
+            categoria: typeof item.categoria === 'object' && item.categoria ? (item.categoria.nombre || 'Canasta Básica') : (item.categoria || 'Canasta Básica')
+          }));
+          setRanking(safeRanking);
         } else {
           // Agrupar los productos por nombre canónico para construir la comparativa multi-comercio
           const groupsMap = new Map<string, any[]>();
@@ -184,7 +188,8 @@ export default function RankingPage() {
     const setCat = new Set<string>();
     if (Array.isArray(ranking)) {
       ranking.forEach((r) => {
-        if (r && r.categoria) setCat.add(r.categoria);
+        const c = typeof r?.categoria === 'object' && r?.categoria ? (r.categoria as any).nombre : r?.categoria;
+        if (c && typeof c === 'string') setCat.add(c);
       });
     }
     return Array.from(setCat);
@@ -428,7 +433,7 @@ export default function RankingPage() {
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-wider badge-steel px-2 py-0.5 rounded">
-                        {item.categoria || 'Canasta Básica'}
+                        {typeof item.categoria === 'object' && item.categoria ? (item.categoria as any).nombre : (item.categoria || 'Canasta Básica')}
                       </span>
                       <h3 className="text-base font-bold text-[#d5d9e0] mt-1.5">
                         {item.nombre}

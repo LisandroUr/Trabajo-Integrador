@@ -27,7 +27,7 @@ interface Producto {
   precio: number;
   descripcion: string;
   disponible: boolean;
-  categoria?: string;
+  categoria?: any;
 }
 
 interface Resena {
@@ -147,10 +147,14 @@ export default function ComercioDetallePage({ params }: { params: Promise<{ id: 
     }
   };
 
-  const productosFiltrados = productos.filter((p) =>
-    p.nombre.toLowerCase().includes(searchProd.toLowerCase()) ||
-    (p.descripcion || '').toLowerCase().includes(searchProd.toLowerCase())
-  );
+  const productosFiltrados = productos.filter((p) => {
+    const catName = typeof p.categoria === 'object' && p.categoria ? p.categoria.nombre : (p.categoria || '');
+    return (
+      (p.nombre || '').toLowerCase().includes(searchProd.toLowerCase()) ||
+      (p.descripcion || '').toLowerCase().includes(searchProd.toLowerCase()) ||
+      String(catName).toLowerCase().includes(searchProd.toLowerCase())
+    );
+  });
 
   if (loading) {
     return (
@@ -283,7 +287,7 @@ export default function ComercioDetallePage({ params }: { params: Promise<{ id: 
                   <div>
                     <div className="flex justify-between items-start">
                       <span className="text-[10px] text-[#9cb1ce] bg-[#1f2633] border border-[#2b3547] px-2 py-0.5 rounded">
-                        {prod.categoria || 'General'}
+                        {typeof prod.categoria === 'object' && prod.categoria ? prod.categoria.nombre : (prod.categoria || 'General')}
                       </span>
                       <span className={`text-[10px] px-2 py-0.5 rounded border ${
                         prod.disponible

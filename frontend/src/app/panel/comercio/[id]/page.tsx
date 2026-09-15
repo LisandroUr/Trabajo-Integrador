@@ -23,7 +23,7 @@ interface Producto {
   precio: number;
   descripcion: string;
   disponible: boolean;
-  categoria?: string;
+  categoria?: any;
 }
 
 interface Comercio {
@@ -135,10 +135,13 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
     }
   };
 
-  const productosFiltrados = productos.filter((p) =>
-    p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.categoria || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const productosFiltrados = productos.filter((p) => {
+    const catName = typeof p.categoria === 'object' && p.categoria ? p.categoria.nombre : (p.categoria || '');
+    return (
+      (p.nombre || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(catName).toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -231,7 +234,7 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
                     </td>
                     <td className="px-6 py-4 text-[#8d94a1] whitespace-nowrap font-medium">
                       <span className="px-2.5 py-1 bg-[#1d222b] border border-[#262d3a] rounded-lg text-[#d5d9e0]">
-                        {prod.categoria || 'General'}
+                        {typeof prod.categoria === 'object' && prod.categoria ? prod.categoria.nombre : (prod.categoria || 'General')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-[#8bb59b] font-bold text-base tabular-nums whitespace-nowrap">
