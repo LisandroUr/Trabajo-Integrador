@@ -390,6 +390,48 @@ Route (app)
 Resultado: 0 errores de tipado, 0 fallos de compilación.
 ```
 
+### 12.3 Pruebas End-to-End en Navegador Real Autónomo (Playwright + Microsoft Edge)
+Verificación de estabilidad de interfaz y navegación sin errores de ejecución mediante automatización de navegador en vivo (`backend/test_browser.js`):
+
+```text
+========================================================
+INICIANDO CONTROL AUTÓNOMO DEL NAVEGADOR WEB (PLAYWRIGHT)
+========================================================
+
+[1] Levantando Microsoft Edge en modo headless...
+
+--- TEST 1: Portada Cívica (/) ---
+[PASS] Portada cargada. Título: "Vidriera Digital Municipal | Observatorio de Precios y Comercio Cívico"
+[PASS] H1 detectado: "Información clara sobre precios para defender la economía familiar."
+
+--- TEST 2: Observatorio de Precios (/ranking) ---
+[PASS] Vista cargada: "Observatorio Municipal de Precios"
+[PASS] Artículos/Encabezados renderizados en ranking: 9
+[PASS] Búsqueda interactiva "Leche" ejecutada
+[PASS] Conmutación a vista de gráfico analítico exitosa
+
+--- TEST 3: Directorio Comercial (/buscar) ---
+[PASS] Comercios habilitados visualizados en padrón: 7
+
+--- TEST 4: Mapa Interactivo Leaflet (/mapa) ---
+[PASS] Contenedor de Leaflet OpenStreetMap presente: true
+
+--- TEST 5: Autenticación Cívica (/login) ---
+[PASS] Login exitoso y redirección automática a: http://localhost:3000/backoffice
+
+--- TEST 6: Panel de Fiscalización (/backoffice) ---
+[PASS] Panel municipal activo: "Control & Fiscalización Cívica"
+
+========================================================
+REPORTE DE ESTABILIDAD DEL NAVEGADOR
+========================================================
+Errores de página no capturados (pageerror): 0
+Errores en consola (console.error): 0
+
+¡ÉXITO TOTAL! Navegación completa sin errores de React ni excepciones no controladas.
+Navegador cerrado ordenadamente.
+```
+
 ---
 
 ## 13. GUÍA PASO A PASO PARA LA PRESENTACIÓN Y DEFENSA DEL PROYECTO
