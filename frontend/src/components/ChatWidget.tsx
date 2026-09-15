@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { fetchAPI } from '@/lib/api';
-import { MessageSquare, Send, X, User, Store } from 'lucide-react';
+import { MessageSquare, Send, X, Store, CheckCheck, Sparkles, ShieldCheck } from 'lucide-react';
 
 interface Mensaje {
   _id?: string;
@@ -44,7 +44,6 @@ export default function ChatWidget({
   useEffect(() => {
     if (!isOpen) return;
 
-    // Obtener usuario actual de localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
@@ -54,7 +53,6 @@ export default function ChatWidget({
       }
     }
 
-    // Inicializar Socket.io
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
     const socketClient = io(socketUrl, {
       transports: ['websocket', 'polling']
@@ -62,7 +60,6 @@ export default function ChatWidget({
 
     setSocket(socketClient);
 
-    // Cargar o crear conversación
     const initChat = async () => {
       setLoading(true);
       try {
@@ -72,10 +69,8 @@ export default function ChatWidget({
         });
         setConversacion(convRes);
 
-        // Unirse a la sala de Socket
         socketClient.emit('join_conversation', convRes._id);
 
-        // Cargar historial de mensajes
         const data = await fetchAPI(`/conversaciones/${convRes._id}/mensajes`);
         setMensajes(data.mensajes || []);
       } catch (err) {
@@ -87,10 +82,8 @@ export default function ChatWidget({
 
     initChat();
 
-    // Escuchar mensajes entrantes en tiempo real
     socketClient.on('receive_message', (msg: Mensaje) => {
       setMensajes((prev) => {
-        // Evitar duplicados si ya está por ID temporal
         if (prev.some((m) => m._id === msg._id)) return prev;
         return [...prev, msg];
       });
@@ -117,20 +110,18 @@ export default function ChatWidget({
 
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Debes iniciar sesión para enviar mensajes al comerciante.');
+      alert('Debes iniciar sesión con tu cuenta para enviar mensajes al comercio.');
       return;
     }
 
     try {
       if (socket && socket.connected) {
-        // Enviar por WebSocket
         socket.emit('send_message', {
           conversacionId: conversacion._id,
           emisorId: currentUser?._id,
           contenido
         });
       } else {
-        // Fallback REST
         const guardado = await fetchAPI(`/conversaciones/${conversacion._id}/mensajes`, {
           method: 'POST',
           body: JSON.stringify({ contenido })
@@ -145,48 +136,55 @@ export default function ChatWidget({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 w-96 max-w-[calc(100vw-2rem)] h-[500px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-5">
-      {/* Header del Chat */}
-      <div className="bg-blue-600 text-white p-4 flex items-center justify-between shadow-sm">
+    <div className="fixed bottom-5 right-5 w-96 max-w-[calc(100vw-2.5rem)] h-[520px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 flex flex-col z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200">
+      {/* Top Header */}
+      <div className="bg-slate-900 text-white px-4 py-3.5 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold">
-            <Store className="w-5 h-5" />
+          <div className="relative">
+            <div className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-200">
+              <Store className="w-4 h-4" />
+            </div>
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-900"></span>
           </div>
           <div>
-            <h3 className="font-bold text-sm leading-tight">{comercioNombre}</h3>
-            <span className="text-[11px] text-blue-100 flex items-center">
-              <span className="w-2 h-2 rounded-full bg-green-400 inline-block mr-1.5 animate-pulse"></span>
-              En línea vía WebSockets
-            </span>
+            <div className="flex items-center space-x-1.5">
+              <h3 className="font-bold text-xs text-white leading-tight">{comercioNombre}</h3>
+              <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+            </div>
+            <span className="text-[10px] text-slate-400 font-medium">Canal de atención directa</span>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-1 rounded-lg hover:bg-white/20 transition-colors"
+          className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          aria-label="Cerrar chat"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Historial de Mensajes */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50">
+      {/* Message Stream */}
+      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/70">
         {loading ? (
-          <div className="flex items-center justify-center h-full text-xs text-gray-400">
-            Conectando con la vidriera...
+          <div className="flex flex-col items-center justify-center h-full text-xs text-slate-400 space-y-2">
+            <div className="w-5 h-5 border-2 border-slate-300 border-t-indigo-600 rounded-full animate-spin"></div>
+            <span>Conectando con el comercio...</span>
           </div>
         ) : mensajes.length === 0 ? (
-          <div className="text-center py-10 text-gray-500">
-            <MessageSquare className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-xs font-semibold">Inicia tu conversación</p>
-            <p className="text-[11px] text-gray-400 mt-1 max-w-[200px] mx-auto">
-              Pregunta por disponibilidad de stock, precios por mayor o envíos.
+          <div className="text-center py-12 px-4">
+            <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mx-auto mb-3">
+              <MessageSquare className="w-5 h-5" />
+            </div>
+            <h4 className="text-xs font-bold text-slate-800">Inicia tu consulta</h4>
+            <p className="text-[11px] text-slate-500 mt-1 max-w-[200px] mx-auto leading-relaxed">
+              Pregunta por disponibilidad de productos, formas de pago o envíos a domicilio.
             </p>
           </div>
         ) : (
           mensajes.map((m, idx) => {
             const emisorId = typeof m.emisorId === 'object' ? m.emisorId?._id : m.emisorId;
             const esMio = currentUser?._id && emisorId === currentUser._id;
-            const emisorNombre = typeof m.emisorId === 'object' ? m.emisorId?.nombre : 'Usuario';
+            const emisorNombre = typeof m.emisorId === 'object' ? m.emisorId?.nombre : 'Comercio';
 
             return (
               <div
@@ -194,26 +192,26 @@ export default function ChatWidget({
                 className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}
               >
                 {!esMio && (
-                  <span className="text-[10px] text-gray-500 mb-0.5 ml-1 font-semibold">
+                  <span className="text-[10px] font-semibold text-slate-500 mb-1 ml-1">
                     {emisorNombre}
                   </span>
                 )}
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-sm shadow-xs ${
+                  className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-2xs ${
                     esMio
-                      ? 'bg-blue-600 text-white rounded-br-none'
-                      : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
+                      ? 'bg-slate-900 text-white rounded-br-xs'
+                      : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{m.contenido}</p>
                   <span
-                    className={`text-[9px] block text-right mt-1 ${
-                      esMio ? 'text-blue-100' : 'text-gray-400'
+                    className={`text-[9px] block text-right mt-1 font-medium ${
+                      esMio ? 'text-slate-400' : 'text-slate-400'
                     }`}
                   >
                     {m.createdAt
                       ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                      : 'Reciente'}
+                      : 'Ahora'}
                   </span>
                 </div>
               </div>
@@ -223,21 +221,21 @@ export default function ChatWidget({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input de Envío */}
-      <form onSubmit={handleEnviar} className="p-3 bg-white border-t border-gray-200 flex items-center space-x-2">
+      {/* Message Input Box */}
+      <form onSubmit={handleEnviar} className="p-3 bg-white border-t border-slate-200/80 flex items-center space-x-2">
         <input
           type="text"
-          placeholder="Escribe un mensaje al comerciante..."
+          placeholder="Escribe un mensaje..."
           value={nuevoMensaje}
           onChange={(e) => setNuevoMensaje(e.target.value)}
-          className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="flex-1 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 focus:outline-none transition-all"
         />
         <button
           type="submit"
           disabled={!nuevoMensaje.trim()}
-          className="p-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl shadow-xs transition-colors flex items-center justify-center"
+          className="p-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white rounded-xl shadow-xs transition-colors flex items-center justify-center flex-shrink-0"
         >
-          <Send className="w-4 h-4" />
+          <Send className="w-3.5 h-3.5" />
         </button>
       </form>
     </div>

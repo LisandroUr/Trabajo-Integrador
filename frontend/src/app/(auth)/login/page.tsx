@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchAPI } from '@/lib/api';
 import Link from 'next/link';
+import { Mail, Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,18 +24,16 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      // Guardar token y usuario en localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
 
-      // Redirigir según el rol
       if (data.roles.includes('superadmin') || data.roles.includes('moderador')) {
         router.push('/backoffice');
       } else {
         router.push('/panel');
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Credenciales inválidas');
     } finally {
       setLoading(false);
     }
@@ -42,64 +41,91 @@ export default function LoginPage() {
 
   return (
     <div>
-      <div className="text-center">
-        <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Iniciar Sesión</h2>
-        <p className="mt-2 text-sm text-gray-600">Vidriera Digital Municipal</p>
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Iniciar Sesión</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Accede a tu panel de comercio, moderación o perfil vecinal
+        </p>
       </div>
       
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-4" onSubmit={handleSubmit}>
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-            <p className="text-sm text-red-700">{error}</p>
+          <div className="bg-rose-50 border border-rose-200 text-rose-800 p-3.5 rounded-2xl text-xs font-semibold flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
+            <span>{error}</span>
           </div>
         )}
         
-        <div className="rounded-md shadow-sm -space-y-px">
+        <div className="space-y-4">
           <div>
-            <label htmlFor="email-address" className="sr-only">Email</label>
-            <input
-              id="email-address"
-              name="email"
-              type="email"
-              required
-              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              placeholder="Correo electrónico"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Correo Electrónico
+            </label>
+            <div className="relative">
+              <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                required
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                placeholder="ejemplo@municipio.gob.ar"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
           </div>
+
           <div>
-            <label htmlFor="password" className="sr-only">Contraseña</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              placeholder="Contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Contraseña
+              </label>
+              <Link href="/olvide-password" className="text-[11px] text-indigo-600 hover:text-indigo-700 font-semibold hover:underline">
+                ¿Olvidaste tu clave?
+              </Link>
+            </div>
+            <div className="relative">
+              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
-        <div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {loading ? 'Ingresando...' : 'Ingresar'}
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full mt-2 py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Verificando credenciales...</span>
+            </>
+          ) : (
+            <>
+              <span>Ingresar a la Plataforma</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
 
-        <div className="flex flex-col space-y-2 text-center mt-4 text-xs">
-          <Link href="/olvide-password" className="text-gray-500 hover:text-blue-600">
-            ¿Olvidaste tu contraseña?
-          </Link>
-          <Link href="/registro" className="text-blue-600 font-semibold hover:underline">
-            ¿No tienes cuenta? Regístrate aquí
-          </Link>
+        <div className="pt-4 border-t border-slate-100 text-center">
+          <p className="text-xs text-slate-500">
+            ¿No posees una cuenta registrada?{' '}
+            <Link href="/registro" className="text-indigo-600 font-bold hover:underline">
+              Crea tu vidriera aquí
+            </Link>
+          </p>
         </div>
       </form>
     </div>

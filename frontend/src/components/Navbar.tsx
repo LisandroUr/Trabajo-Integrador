@@ -4,17 +4,19 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
-  Store, 
+  Building2, 
   TrendingUp, 
   MapPin, 
   ShieldCheck, 
-  Briefcase, 
+  LayoutDashboard, 
   MessageSquare, 
   LogOut, 
   LogIn, 
   Menu, 
   X,
-  User
+  Store,
+  ChevronRight,
+  UserCheck
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -38,7 +40,6 @@ export default function Navbar() {
     };
     checkUser();
 
-    // Escuchar eventos de cambio en storage
     window.addEventListener('storage', checkUser);
     return () => window.removeEventListener('storage', checkUser);
   }, [pathname]);
@@ -53,121 +54,118 @@ export default function Navbar() {
   const isAdmin = user?.roles?.includes('superadmin') || user?.roles?.includes('moderador');
   const isComerciante = user?.roles?.includes('comerciante');
 
+  const navLinks = [
+    { href: '/buscar', label: 'Comercios', icon: Store },
+    { href: '/ranking', label: 'Ranking de Precios', icon: TrendingUp },
+    { href: '/mapa', label: 'Mapa Interactivo', icon: MapPin },
+  ];
+
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-xs">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Logo & Marca */}
-          <div className="flex items-center space-x-3">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm group-hover:bg-blue-700 transition-colors">
-                <Store className="w-5 h-5" />
+        <div className="flex h-16 items-center justify-between">
+          {/* Brand Logo */}
+          <div className="flex items-center space-x-6">
+            <Link href="/" className="flex items-center space-x-3 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs transition-transform duration-200 group-hover:scale-105 group-hover:bg-indigo-600">
+                <Building2 className="h-5 w-5" strokeWidth={2} />
               </div>
-              <div>
-                <span className="text-lg font-black tracking-tight text-gray-900 block leading-tight">
-                  Vidriera<span className="text-blue-600">Digital</span>
+              <div className="flex flex-col">
+                <span className="text-base font-extrabold tracking-tight text-slate-900 leading-tight">
+                  Vidriera<span className="text-indigo-600 font-black">Digital</span>
                 </span>
-                <span className="text-[10px] uppercase font-bold text-gray-600 tracking-wider block">
-                  Municipalidad
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 leading-none">
+                  Portal Municipal
                 </span>
               </div>
             </Link>
 
-            {/* Links principales Desktop */}
-            <nav className="hidden md:flex ml-8 space-x-1">
-              <Link 
-                href="/buscar" 
-                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center space-x-1.5 ${
-                  pathname === '/buscar' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                <Store className="w-4 h-4" />
-                <span>Comercios</span>
-              </Link>
-              <Link 
-                href="/ranking" 
-                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center space-x-1.5 ${
-                  pathname === '/ranking' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                <TrendingUp className="w-4 h-4 text-green-600" />
-                <span>Ranking de Precios</span>
-              </Link>
-              <Link 
-                href="/mapa" 
-                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center space-x-1.5 ${
-                  pathname === '/mapa' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                <MapPin className="w-4 h-4 text-red-500" />
-                <span>Mapa</span>
-              </Link>
+            {/* Desktop Navigation Links */}
+            <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-slate-200">
+              {navLinks.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-semibold tracking-normal transition-all duration-150 ${
+                      isActive
+                        ? 'bg-slate-100 text-slate-900 shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Icon className={`h-4 w-4 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} strokeWidth={2} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
             </nav>
           </div>
 
-          {/* Menú de Usuario / Acciones Desktop */}
+          {/* Desktop Right Actions */}
           <div className="hidden md:flex items-center space-x-3">
             {user ? (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2.5">
                 {isAdmin && (
-                  <Link 
-                    href="/backoffice" 
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors flex items-center space-x-1"
+                  <Link
+                    href="/backoffice"
+                    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60 hover:bg-indigo-100/70 transition-colors"
                   >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Backoffice</span>
+                    <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
+                    <span>Administración</span>
                   </Link>
                 )}
 
                 {isComerciante && (
                   <>
-                    <Link 
-                      href="/panel" 
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors flex items-center space-x-1"
+                    <Link
+                      href="/panel"
+                      className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-xs"
                     >
-                      <Briefcase className="w-4 h-4" />
+                      <LayoutDashboard className="h-3.5 w-3.5" />
                       <span>Mi Panel</span>
                     </Link>
-                    <Link 
-                      href="/panel/mensajes" 
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors flex items-center space-x-1"
-                      title="Bandeja de Mensajes"
+                    <Link
+                      href="/panel/mensajes"
+                      className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200/80 transition-colors"
+                      title="Mensajes de clientes"
                     >
-                      <MessageSquare className="w-4 h-4 text-blue-600" />
+                      <MessageSquare className="h-3.5 w-3.5 text-slate-500" />
                       <span>Mensajes</span>
                     </Link>
                   </>
                 )}
 
-                <div className="flex items-center space-x-2 pl-2 border-l border-gray-200">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
-                    {user.nombre?.charAt(0) || 'U'}
+                <div className="flex items-center space-x-2 pl-3 border-l border-slate-200">
+                  <div className="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 text-slate-800 flex items-center justify-center font-bold text-xs">
+                    {user.nombre?.charAt(0).toUpperCase() || 'U'}
                   </div>
-                  <div className="text-left hidden lg:block">
-                    <p className="text-xs font-bold text-gray-800 leading-none">{user.nombre}</p>
-                    <p className="text-[10px] text-gray-600">{user.email}</p>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold text-slate-800 leading-tight">{user.nombre}</span>
+                    <span className="text-[10px] text-slate-500 leading-none truncate max-w-[120px]">{user.email}</span>
                   </div>
-                  <button 
+                  <button
                     onClick={handleLogout}
-                    className="p-1.5 text-gray-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-                    title="Cerrar Sesión"
+                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors ml-1"
+                    title="Cerrar sesión"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="h-4 w-4" />
                   </button>
                 </div>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Link 
-                  href="/login" 
-                  className="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-blue-600 rounded-lg hover:bg-gray-100 transition-colors flex items-center space-x-1"
+                <Link
+                  href="/login"
+                  className="px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors flex items-center space-x-1.5"
                 >
-                  <LogIn className="w-4 h-4" />
-                  <span>Ingresar</span>
+                  <LogIn className="h-3.5 w-3.5 text-slate-500" />
+                  <span>Iniciar sesión</span>
                 </Link>
-                <Link 
-                  href="/registro" 
-                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-xs transition-colors"
+                <Link
+                  href="/registro"
+                  className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs transition-colors"
                 >
                   Registrarse
                 </Link>
@@ -175,108 +173,107 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Botón menú móvil */}
+          {/* Mobile menu trigger */}
           <div className="flex md:hidden items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              aria-label="Abrir menú"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Menú Móvil desplegable */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white px-4 pt-2 pb-4 space-y-2">
-          <Link 
-            href="/buscar"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
-          >
-            <Store className="w-5 h-5 text-blue-600" />
-            <span>Comercios</span>
-          </Link>
-          <Link 
-            href="/ranking"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
-          >
-            <TrendingUp className="w-5 h-5 text-green-600" />
-            <span>Ranking de Precios</span>
-          </Link>
-          <Link 
-            href="/mapa"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
-          >
-            <MapPin className="w-5 h-5 text-red-500" />
-            <span>Mapa</span>
-          </Link>
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-1 shadow-lg">
+          {navLinks.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold ${
+                  isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Icon className="h-4 w-4 text-slate-500" />
+                  <span>{item.label}</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-slate-400" />
+              </Link>
+            );
+          })}
 
-          {user ? (
-            <div className="border-t border-gray-200 pt-3 mt-3 space-y-2">
-              <div className="px-3 py-1">
-                <p className="text-sm font-bold text-gray-900">{user.nombre}</p>
-                <p className="text-xs text-gray-500">{user.email}</p>
-              </div>
-              {isAdmin && (
-                <Link 
-                  href="/backoffice"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-purple-700 bg-purple-50"
+          <div className="pt-4 border-t border-slate-100">
+            {user ? (
+              <div className="space-y-2">
+                <div className="px-3 py-1.5">
+                  <p className="text-xs font-bold text-slate-900">{user.nombre}</p>
+                  <p className="text-[11px] text-slate-500">{user.email}</p>
+                </div>
+                {isAdmin && (
+                  <Link
+                    href="/backoffice"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700"
+                  >
+                    <ShieldCheck className="h-4 w-4" />
+                    <span>Panel de Administración Municipal</span>
+                  </Link>
+                )}
+                {isComerciante && (
+                  <>
+                    <Link
+                      href="/panel"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-900 text-white"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Panel de Vidrieras</span>
+                    </Link>
+                    <Link
+                      href="/panel/mensajes"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      <span>Bandeja de Mensajes</span>
+                    </Link>
+                  </>
+                )}
+                <button
+                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                  className="w-full text-left flex items-center space-x-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                 >
-                  <ShieldCheck className="w-5 h-5" />
-                  <span>Panel Municipal (Backoffice)</span>
+                  <LogOut className="h-4 w-4" />
+                  <span>Cerrar sesión</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Iniciar sesión
                 </Link>
-              )}
-              {isComerciante && (
-                <>
-                  <Link 
-                    href="/panel"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-indigo-700 bg-indigo-50"
-                  >
-                    <Briefcase className="w-5 h-5" />
-                    <span>Mi Panel de Tiendas</span>
-                  </Link>
-                  <Link 
-                    href="/panel/mensajes"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
-                  >
-                    <MessageSquare className="w-5 h-5 text-blue-600" />
-                    <span>Mensajes y Chat</span>
-                  </Link>
-                </>
-              )}
-              <button 
-                onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                className="w-full text-left flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50"
-              >
-                <LogOut className="w-5 h-5" />
-                <span>Cerrar Sesión</span>
-              </button>
-            </div>
-          ) : (
-            <div className="border-t border-gray-200 pt-3 mt-3 space-y-2">
-              <Link 
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-center w-full px-4 py-2 border border-gray-300 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Ingresar
-              </Link>
-              <Link 
-                href="/registro"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-center w-full px-4 py-2 bg-blue-600 text-white rounded-md text-base font-medium hover:bg-blue-700"
-              >
-                Registrarse
-              </Link>
-            </div>
-          )}
+                <Link
+                  href="/registro"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center px-3 py-2 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 shadow-xs"
+                >
+                  Registrarse
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </header>

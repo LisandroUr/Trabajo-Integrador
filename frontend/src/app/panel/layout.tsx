@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -17,30 +16,21 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
       router.push('/login');
       return;
     }
-    setUserName(JSON.parse(userStr).nombre);
     setIsAuthenticated(true);
   }, [router]);
 
-  if (!isAuthenticated) return <div className="min-h-screen flex items-center justify-center">Cargando perfil...</div>;
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Accediendo a la vidriera comercial...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <nav className="bg-indigo-700 text-white p-4 shadow-sm">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">Mi Vidriera (Comerciante)</h1>
-          <div className="flex items-center space-x-6">
-            <span className="text-sm text-indigo-200 hidden sm:inline-block">Hola, {userName}</span>
-            <Link href="/panel" className="hover:text-indigo-200 font-medium">Mis Tiendas</Link>
-            <button 
-              onClick={() => { localStorage.clear(); router.push('/login'); }} 
-              className="text-red-300 hover:text-red-100 font-semibold border-l pl-4 border-indigo-500"
-            >
-              Salir
-            </button>
-          </div>
-        </div>
-      </nav>
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6">
+    <div className="min-h-screen bg-slate-50/50">
+      <main className="w-full">
         {children}
       </main>
     </div>

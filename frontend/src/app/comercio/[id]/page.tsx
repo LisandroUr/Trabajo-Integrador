@@ -12,11 +12,15 @@ import {
   MessageCircle, 
   Star, 
   Search, 
-  ShoppingBag, 
+  Package, 
   Send, 
   AlertTriangle, 
-  CheckCircle,
-  MessageSquare
+  CheckCircle2,
+  MessageSquare,
+  ShieldCheck,
+  ChevronLeft,
+  Calendar,
+  UserCheck
 } from 'lucide-react';
 
 interface Producto {
@@ -49,7 +53,7 @@ export default function VidrieraPublicaPage() {
   const [filtroProd, setFiltroProd] = useState('');
   const [chatOpen, setChatOpen] = useState(false);
 
-  // Estados del Formulario de Reseña
+  // Form states for review
   const [puntaje, setPuntaje] = useState(5);
   const [comentario, setComentario] = useState('');
   const [enviandoResena, setEnviandoResena] = useState(false);
@@ -81,7 +85,7 @@ export default function VidrieraPublicaPage() {
     e.preventDefault();
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Debes iniciar sesión con una cuenta de vecino para dejar tu reseña.');
+      alert('Debes iniciar sesión con tu cuenta para calificar este comercio.');
       return;
     }
 
@@ -89,7 +93,7 @@ export default function VidrieraPublicaPage() {
     setMensajeResena('');
 
     try {
-      const res = await fetchAPI('/resenas', {
+      await fetchAPI('/resenas', {
         method: 'POST',
         body: JSON.stringify({
           comercioId: id,
@@ -99,7 +103,7 @@ export default function VidrieraPublicaPage() {
       });
 
       setComentario('');
-      setMensajeResena('¡Gracias! Tu opinión fue registrada con éxito.');
+      setMensajeResena('Tu opinión fue registrada y publicada exitosamente.');
       loadData();
     } catch (err: any) {
       alert(err.message || 'Error al enviar la reseña');
@@ -109,10 +113,10 @@ export default function VidrieraPublicaPage() {
   };
 
   const handleReportarResena = async (resenaId: string) => {
-    if (!confirm('¿Deseas reportar este comentario por contenido inadecuado u ofensivo?')) return;
+    if (!confirm('¿Deseas reportar este comentario para revisión por parte de la administración municipal?')) return;
     try {
       await fetchAPI(`/resenas/${resenaId}/reportar`, { method: 'PATCH' });
-      alert('Reseña reportada para moderación por parte del equipo municipal.');
+      alert('Comentario reportado para moderación.');
     } catch (err: any) {
       alert('Error al reportar: ' + err.message);
     }
@@ -120,8 +124,9 @@ export default function VidrieraPublicaPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="w-8 h-8 border-3 border-slate-200 border-t-slate-900 rounded-full animate-spin mb-3"></div>
+        <span className="text-xs text-slate-500 font-medium">Cargando vidriera...</span>
       </div>
     );
   }
@@ -129,11 +134,12 @@ export default function VidrieraPublicaPage() {
   if (!comercio) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6">
-        <Store className="w-16 h-16 text-gray-400 mb-3" />
-        <h2 className="text-xl font-bold text-gray-800">Comercio no encontrado</h2>
-        <p className="text-gray-500 text-sm mt-1 mb-4">La vidriera solicitada no existe o fue dada de baja.</p>
-        <Link href="/buscar" className="text-blue-600 font-semibold hover:underline">
-          &larr; Volver al directorio de comercios
+        <Store className="w-12 h-12 text-slate-300 mb-3" />
+        <h2 className="text-base font-bold text-slate-800">Comercio no encontrado</h2>
+        <p className="text-slate-500 text-xs mt-1 mb-4">El establecimiento solicitado no existe o fue dado de baja.</p>
+        <Link href="/buscar" className="text-indigo-600 font-semibold text-xs hover:underline flex items-center space-x-1">
+          <ChevronLeft className="w-3.5 h-3.5" />
+          <span>Volver al directorio</span>
         </Link>
       </div>
     );
@@ -145,47 +151,59 @@ export default function VidrieraPublicaPage() {
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-16">
-      {/* Hero Header Municipal del Comercio */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white py-12 px-4 sm:px-6 lg:px-8 shadow-md">
+    <div className="bg-slate-50 min-h-screen pb-16">
+      {/* Top Banner Hero */}
+      <div className="bg-slate-900 text-white border-b border-slate-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
+          <div className="mb-4">
+            <Link 
+              href="/buscar"
+              className="inline-flex items-center space-x-1 text-slate-400 hover:text-white text-xs font-semibold transition-colors"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Volver a Comercios</span>
+            </Link>
+          </div>
+
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="flex-1">
-              <div className="inline-flex items-center space-x-1.5 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-                <Store className="w-3.5 h-3.5 text-blue-200" />
-                <span>Vidriera Oficial Verificada</span>
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/10 text-slate-200 text-xs font-semibold mb-3 border border-white/10">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Establecimiento Oficial Verificado</span>
               </div>
-              <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-2">{comercio.nombre}</h1>
-              <p className="text-blue-100 text-base max-w-2xl leading-relaxed mb-4">
-                {comercio.descripcion || 'Comercio local adherido a la red de vidrieras digitales de la ciudad.'}
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white mb-2">
+                {comercio.nombre}
+              </h1>
+              <p className="text-slate-300 text-sm max-w-2xl leading-relaxed mb-5 font-normal">
+                {comercio.descripcion || 'Comercio de proximidad habilitado por la Dirección de Comercio e Industria.'}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-blue-200">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
                 {comercio.direccion && (
-                  <span className="flex items-center space-x-1 bg-white/10 px-3 py-1 rounded-lg">
-                    <MapPin className="w-4 h-4 text-red-300" />
+                  <span className="flex items-center space-x-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
                     <span>{comercio.direccion}</span>
                   </span>
                 )}
-                <span className="flex items-center space-x-1 bg-yellow-400/20 text-yellow-300 font-bold px-3 py-1 rounded-lg">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span className="flex items-center space-x-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg font-semibold text-white">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   <span>
                     {comercio.calificacionPromedio > 0
                       ? `${comercio.calificacionPromedio.toFixed(1)} (${comercio.cantidadResenas || resenas.length} opiniones)`
-                      : 'Comercio Nuevo'}
+                      : 'Nuevo'}
                   </span>
                 </span>
               </div>
             </div>
 
-            {/* Acciones de Contacto Inmediato */}
-            <div className="flex flex-col sm:flex-row md:flex-col gap-3 min-w-[220px]">
+            {/* Direct Contact Actions */}
+            <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 min-w-[200px]">
               <button
                 onClick={() => setChatOpen(true)}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-5 rounded-xl shadow-lg transition-transform hover:scale-102 flex items-center justify-center space-x-2 text-sm"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 text-xs"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span>💬 Chatear en Vivo</span>
+                <span>Iniciar Consulta</span>
               </button>
 
               {comercio.contacto?.whatsapp && (
@@ -193,17 +211,17 @@ export default function VidrieraPublicaPage() {
                   href={`https://wa.me/${comercio.contacto.whatsapp.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center space-x-2 text-sm text-center"
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 font-semibold py-2.5 px-4 rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-2 text-xs text-center"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>WhatsApp Directo</span>
+                  <MessageCircle className="w-4 h-4 text-emerald-400" />
+                  <span>WhatsApp</span>
                 </a>
               )}
 
               {comercio.contacto?.telefono && (
                 <a
                   href={`tel:${comercio.contacto.telefono}`}
-                  className="w-full bg-white/15 hover:bg-white/25 text-white font-medium py-2 px-4 rounded-xl transition-colors flex items-center justify-center space-x-2 text-xs text-center"
+                  className="w-full bg-white/5 hover:bg-white/10 text-slate-300 font-medium py-2 px-4 rounded-xl transition-colors flex items-center justify-center space-x-2 text-xs text-center border border-white/5"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>{comercio.contacto.telefono}</span>
@@ -214,64 +232,67 @@ export default function VidrieraPublicaPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-        {/* Catálogo de Productos */}
+      {/* Main Content Area */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        {/* Products Catalog Section */}
         <div className="mb-14">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-2xl font-black text-gray-900 flex items-center space-x-2">
-                <ShoppingBag className="w-6 h-6 text-blue-600" />
-                <span>Catálogo de Productos y Precios</span>
+              <h2 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
+                <Package className="w-5 h-5 text-indigo-600" />
+                <span>Catálogo Oficial de Productos y Precios</span>
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">Precios informados directamente por el comerciante</p>
+              <p className="text-xs text-slate-500 mt-0.5 font-normal">
+                {productos.length} artículos publicados por el comerciante
+              </p>
             </div>
 
             <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Buscar en el catálogo..."
                 value={filtroProd}
                 onChange={(e) => setFiltroProd(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-white border border-gray-300 rounded-xl text-xs text-gray-900 focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
               />
             </div>
           </div>
 
           {productosFiltrados.length === 0 ? (
-            <div className="bg-white p-10 text-center rounded-2xl border border-gray-200 shadow-xs">
-              <span className="text-4xl mb-3 block">📦</span>
-              <p className="text-gray-600 font-semibold text-sm">
-                {filtroProd ? 'No hay productos que coincidan con la búsqueda.' : 'Este comercio aún no ha publicado productos en su catálogo.'}
+            <div className="bg-white p-12 text-center rounded-2xl border border-slate-200/80 shadow-xs">
+              <Package className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <p className="text-slate-700 font-semibold text-xs">
+                {filtroProd ? 'No hay productos que coincidan con la búsqueda.' : 'No hay productos publicados actualmente en esta vidriera.'}
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {productosFiltrados.map((p) => (
                 <div
                   key={p._id}
-                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-md hover:border-blue-300 transition-all flex flex-col group"
+                  className="bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-300 hover:shadow-md transition-all flex flex-col p-4"
                 >
-                  <div className="h-36 bg-gradient-to-br from-gray-50 to-blue-50/50 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
-                    🛍️
+                  <div className="h-28 bg-slate-50 rounded-xl flex items-center justify-center text-slate-300 mb-3 border border-slate-100">
+                    <Package className="w-8 h-8 text-slate-400" />
                   </div>
-                  <div className="p-4 flex flex-col flex-1">
-                    <h3 className="font-bold text-base text-gray-900 leading-snug line-clamp-1">{p.nombre}</h3>
-                    <p className="text-xs text-gray-500 mt-1 mb-4 flex-1 line-clamp-2">{p.descripcion || 'Sin descripción detallada.'}</p>
-                    <div className="flex items-end justify-between mt-auto pt-3 border-t border-gray-100">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block">Precio</span>
-                        <span className="text-xl font-black text-green-600">
-                          ${p.precio.toLocaleString('es-AR')}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => setChatOpen(true)}
-                        className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-lg text-xs transition-colors"
-                      >
-                        Consultar
-                      </button>
+                  <h3 className="font-bold text-sm text-slate-900 leading-snug line-clamp-1">{p.nombre}</h3>
+                  <p className="text-xs text-slate-500 mt-1 mb-4 flex-1 line-clamp-2 font-normal">
+                    {p.descripcion || 'Sin descripción detallada.'}
+                  </p>
+                  <div className="flex items-end justify-between mt-auto pt-3 border-t border-slate-100">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Precio</span>
+                      <span className="text-lg font-black text-slate-900 font-mono tabular-nums">
+                        ${p.precio.toLocaleString('es-AR')}
+                      </span>
                     </div>
+                    <button
+                      onClick={() => setChatOpen(true)}
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg text-xs transition-colors"
+                    >
+                      Consultar
+                    </button>
                   </div>
                 </div>
               ))}
@@ -279,30 +300,37 @@ export default function VidrieraPublicaPage() {
           )}
         </div>
 
-        {/* Sección de Reseñas y Calificaciones (Etapa 5) */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
+        {/* Citizen Reviews & Ratings Section */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-100">
             <div>
-              <h2 className="text-2xl font-black text-gray-900 flex items-center space-x-2">
-                <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" />
-                <span>Opiniones de la Comunidad</span>
+              <h2 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
+                <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+                <span>Opiniones y Calificaciones</span>
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Calificaciones y comentarios de vecinos que visitaron este comercio.
+              <p className="text-xs text-slate-500 mt-0.5 font-normal">
+                Comentarios y experiencias compartidas por vecinos verificados.
               </p>
             </div>
 
-            <div className="flex items-center space-x-3 bg-yellow-50/80 px-4 py-2.5 rounded-xl border border-yellow-200">
-              <span className="text-3xl font-black text-yellow-700">
-                {comercio.calificacionPromedio > 0 ? comercio.calificacionPromedio.toFixed(1) : 'Nuevo'}
+            <div className="flex items-center space-x-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
+              <span className="text-2xl font-black text-slate-900 font-mono">
+                {comercio.calificacionPromedio > 0 ? comercio.calificacionPromedio.toFixed(1) : '0.0'}
               </span>
               <div className="text-left">
-                <div className="flex text-yellow-400 text-xs">
+                <div className="flex text-amber-400">
                   {[1, 2, 3, 4, 5].map((s) => (
-                    <span key={s}>{s <= Math.round(comercio.calificacionPromedio || 0) ? '★' : '☆'}</span>
+                    <Star
+                      key={s}
+                      className={`w-3.5 h-3.5 ${
+                        s <= Math.round(comercio.calificacionPromedio || 0)
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'text-slate-200'
+                      }`}
+                    />
                   ))}
                 </div>
-                <span className="text-[11px] text-yellow-800 font-bold">
+                <span className="text-[11px] text-slate-500 font-medium">
                   {resenas.length} {resenas.length === 1 ? 'opinión' : 'opiniones'}
                 </span>
               </div>
@@ -310,43 +338,45 @@ export default function VidrieraPublicaPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Formulario para Dejar Opinión */}
-            <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-              <h3 className="font-bold text-base text-gray-900 mb-3">Deja tu opinión</h3>
+            {/* Rating Submission Form */}
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700 mb-3">Dejar una calificación</h3>
               <form onSubmit={handleEnviarResena} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Calificación (Estrellas):</label>
-                  <div className="flex space-x-2">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Puntaje:</label>
+                  <div className="flex space-x-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         type="button"
                         key={star}
                         onClick={() => setPuntaje(star)}
-                        className={`text-2xl transition-transform hover:scale-125 ${
-                          star <= puntaje ? 'text-yellow-400' : 'text-gray-300'
-                        }`}
+                        className="p-1 hover:scale-110 transition-transform"
                       >
-                        ★
+                        <Star
+                          className={`w-6 h-6 ${
+                            star <= puntaje ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
+                          }`}
+                        />
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Comentario sobre el comercio:</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">Comentario:</label>
                   <textarea
                     rows={3}
                     required
-                    placeholder="Comparte tu experiencia: atención, precios, calidad..."
+                    placeholder="Describe tu experiencia sobre atención, higiene, precios o calidad..."
                     value={comentario}
                     onChange={(e) => setComentario(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-gray-300 rounded-xl text-xs text-gray-900 focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
                   />
                 </div>
 
                 {mensajeResena && (
-                  <div className="p-2.5 bg-green-50 text-green-700 text-xs rounded-lg flex items-center space-x-1.5">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                  <div className="p-2.5 bg-emerald-50 text-emerald-700 text-xs rounded-xl flex items-center space-x-1.5 border border-emerald-200">
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
                     <span>{mensajeResena}</span>
                   </div>
                 )}
@@ -354,55 +384,61 @@ export default function VidrieraPublicaPage() {
                 <button
                   type="submit"
                   disabled={enviandoResena}
-                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-xs transition-colors flex items-center justify-center space-x-1.5"
+                  className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-semibold rounded-xl text-xs shadow-xs transition-colors flex items-center justify-center space-x-1.5"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>{enviandoResena ? 'Enviando...' : 'Publicar Opinión'}</span>
+                  <span>{enviandoResena ? 'Publicando...' : 'Publicar Opinión'}</span>
                 </button>
               </form>
             </div>
 
-            {/* Listado de Opiniones */}
-            <div className="lg:col-span-2 space-y-4">
+            {/* Reviews Stream */}
+            <div className="lg:col-span-2 space-y-3">
               {resenas.length === 0 ? (
-                <div className="text-center py-10 text-gray-500 text-xs">
-                  Aún no hay opiniones sobre este comercio. ¡Sé el primero en calificarlo!
+                <div className="text-center py-12 text-slate-400 text-xs">
+                  Aún no hay opiniones registradas para este comercio. Sé el primero en dejar tu valoración.
                 </div>
               ) : (
                 resenas.map((r) => (
-                  <div key={r._id} className="p-4 rounded-xl border border-gray-200 bg-white shadow-xs">
-                    <div className="flex items-center justify-between mb-1.5">
+                  <div key={r._id} className="p-4 rounded-xl border border-slate-200/80 bg-white">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
-                        <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center">
-                          {r.usuarioId?.nombre?.charAt(0) || 'V'}
+                        <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">
+                          {r.usuarioId?.nombre?.charAt(0).toUpperCase() || 'V'}
                         </div>
-                        <span className="font-bold text-xs text-gray-900">{r.usuarioId?.nombre || 'Vecino'}</span>
+                        <span className="font-bold text-xs text-slate-800">{r.usuarioId?.nombre || 'Vecino'}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <span className="text-yellow-500 text-xs font-bold">
-                          {'★'.repeat(Math.min(5, Math.floor(r.puntaje)))}
-                          {'☆'.repeat(Math.max(0, 5 - Math.floor(r.puntaje)))}
-                        </span>
-                        <span className="text-[10px] text-gray-400">
+                        <div className="flex text-amber-400">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={`w-3 h-3 ${
+                                s <= r.puntaje ? 'fill-amber-400 text-amber-400' : 'text-slate-200'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[10px] text-slate-400">
                           {new Date(r.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
 
-                    <p className="text-xs text-gray-700 leading-relaxed pl-9">{r.comentario}</p>
+                    <p className="text-xs text-slate-600 leading-relaxed pl-9 font-normal">{r.comentario}</p>
 
-                    {/* Respuesta del Comerciante si existe */}
+                    {/* Merchant Official Reply */}
                     {r.respuestaComerciante && (
-                      <div className="mt-3 ml-9 p-3 bg-blue-50/70 border-l-3 border-blue-600 rounded-r-lg text-xs">
-                        <span className="font-bold text-blue-900 block mb-0.5">Respuesta del Comercio:</span>
-                        <p className="text-blue-800">{r.respuestaComerciante}</p>
+                      <div className="mt-3 ml-9 p-3 bg-slate-50 border-l-2 border-slate-900 rounded-r-lg text-xs">
+                        <span className="font-bold text-slate-800 block text-[11px] mb-0.5">Respuesta oficial del comercio:</span>
+                        <p className="text-slate-600 font-normal">{r.respuestaComerciante}</p>
                       </div>
                     )}
 
                     <div className="flex justify-end mt-2">
                       <button
                         onClick={() => handleReportarResena(r._id)}
-                        className="text-[10px] text-gray-400 hover:text-red-500 flex items-center space-x-1"
+                        className="text-[10px] text-slate-400 hover:text-rose-600 flex items-center space-x-1"
                         title="Reportar comentario inapropiado"
                       >
                         <AlertTriangle className="w-3 h-3" />
@@ -417,7 +453,7 @@ export default function VidrieraPublicaPage() {
         </div>
       </div>
 
-      {/* Widget flotante de Chat en tiempo real */}
+      {/* Floating Chat Messenger */}
       <ChatWidget
         comercioId={id}
         comercioNombre={comercio.nombre}

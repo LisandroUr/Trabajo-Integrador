@@ -11,7 +11,10 @@ import {
   Store, 
   Clock, 
   ArrowLeft,
-  CheckCheck
+  CheckCheck,
+  Search,
+  Sparkles,
+  Inbox
 } from 'lucide-react';
 
 interface Mensaje {
@@ -45,6 +48,7 @@ export default function MensajesPanelPage() {
   const [conversacionActiva, setConversacionActiva] = useState<Conversacion | null>(null);
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [nuevoMensaje, setNuevoMensaje] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -148,41 +152,78 @@ export default function MensajesPanelPage() {
     }
   };
 
-  // Obtener el interlocutor (el cliente o la otra persona)
   const getInterlocutor = (conv: Conversacion) => {
     const otro = conv.participantes?.find((p) => p._id !== currentUser?._id);
     return otro ? otro.nombre : 'Cliente Vecino';
   };
 
+  const filteredConversaciones = conversaciones.filter((c) => {
+    const nombre = getInterlocutor(c).toLowerCase();
+    const tienda = (c.comercioId?.nombre || '').toLowerCase();
+    const query = searchTerm.toLowerCase();
+    return nombre.includes(query) || tienda.includes(query);
+  });
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-4">
-        <Link href="/panel" className="text-indigo-600 hover:underline text-sm font-semibold flex items-center space-x-1">
-          <ArrowLeft className="w-4 h-4" />
-          <span>Volver al Panel de Tiendas</span>
+      {/* Top Breadcrumb navigation */}
+      <div className="mb-6 flex items-center justify-between">
+        <Link 
+          href="/panel" 
+          className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors group"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+          <span>Volver al Panel de Gestión</span>
         </Link>
+        <span className="text-xs text-slate-400 font-medium">Bandeja de Mensajería Omnicanal</span>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xs border border-gray-200 overflow-hidden flex flex-col md:flex-row h-[650px]">
-        {/* Lista de Conversaciones (Sidebar) */}
-        <div className="w-full md:w-80 border-r border-gray-200 flex flex-col h-full bg-gray-50/50">
-          <div className="p-4 border-b border-gray-200 bg-white">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
-              <MessageSquare className="w-5 h-5 text-indigo-600" />
-              <span>Bandeja de Consultas</span>
-            </h2>
-            <p className="text-xs text-gray-500 mt-0.5">Mensajes de clientes de tus vidrieras</p>
+      {/* Main Messenger Box */}
+      <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200/80 overflow-hidden flex flex-col md:flex-row h-[700px]">
+        {/* Sidebar */}
+        <div className="w-full md:w-88 border-r border-slate-100 flex flex-col h-full bg-slate-50/50">
+          <div className="p-5 border-b border-slate-100 bg-white">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900 tracking-tight">Consultas de Clientes</h2>
+                  <p className="text-[11px] text-slate-400">Interacciones en tiempo real</p>
+                </div>
+              </div>
+              <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full border border-slate-200">
+                {conversaciones.length}
+              </span>
+            </div>
+
+            {/* Search filter in conversations */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Filtrar por cliente o comercio..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              />
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-100/80">
             {loading ? (
-              <div className="p-4 text-center text-xs text-gray-400">Cargando chats...</div>
-            ) : conversaciones.length === 0 ? (
-              <div className="p-8 text-center text-gray-400 text-xs">
-                No tienes consultas de clientes aún.
+              <div className="p-8 text-center text-xs text-slate-400">
+                Cargando conversaciones activas...
+              </div>
+            ) : filteredConversaciones.length === 0 ? (
+              <div className="p-8 text-center flex flex-col items-center justify-center h-48 text-slate-400">
+                <Inbox className="w-8 h-8 text-slate-300 mb-2 stroke-[1.5]" />
+                <p className="text-xs font-semibold text-slate-600">No hay consultas registradas</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Los vecinos aparecerán aquí cuando hagan preguntas.</p>
               </div>
             ) : (
-              conversaciones.map((conv) => {
+              filteredConversaciones.map((conv) => {
                 const isActive = conversacionActiva?._id === conv._id;
                 const nombreCliente = getInterlocutor(conv);
 
@@ -190,26 +231,37 @@ export default function MensajesPanelPage() {
                   <button
                     key={conv._id}
                     onClick={() => seleccionarConversacion(conv)}
-                    className={`w-full text-left p-4 border-b border-gray-100 transition-colors flex items-start space-x-3 ${
-                      isActive ? 'bg-indigo-50/70 border-l-4 border-l-indigo-600' : 'hover:bg-gray-100/70'
+                    className={`w-full text-left p-4 transition-all flex items-start space-x-3.5 ${
+                      isActive 
+                        ? 'bg-indigo-50/70 border-l-4 border-l-indigo-600 shadow-xs' 
+                        : 'hover:bg-slate-100/60'
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm flex-shrink-0">
-                      {nombreCliente.charAt(0)}
+                    <div className="relative flex-shrink-0">
+                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white font-black flex items-center justify-center text-sm shadow-sm">
+                        {nombreCliente.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
                     </div>
+
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-baseline mb-1">
-                        <h4 className="text-sm font-bold text-gray-900 truncate">{nombreCliente}</h4>
-                        <span className="text-[10px] text-gray-400 flex-shrink-0">
+                      <div className="flex justify-between items-baseline mb-0.5">
+                        <h4 className="text-xs font-bold text-slate-900 truncate tracking-tight">{nombreCliente}</h4>
+                        <span className="text-[10px] text-slate-400 flex-shrink-0 font-medium">
                           {conv.fechaUltimoMensaje
-                            ? new Date(conv.fechaUltimoMensaje).toLocaleDateString()
+                            ? new Date(conv.fechaUltimoMensaje).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                             : ''}
                         </span>
                       </div>
-                      <p className="text-xs text-indigo-600 font-medium truncate mb-1">
-                        🏪 {conv.comercioId?.nombre}
+                      
+                      <div className="flex items-center space-x-1 text-[11px] text-indigo-600 font-semibold truncate mb-1">
+                        <Store className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{conv.comercioId?.nombre}</span>
+                      </div>
+
+                      <p className="text-xs text-slate-500 truncate font-normal">
+                        {conv.ultimoMensaje || 'Sin mensajes recientes'}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">{conv.ultimoMensaje}</p>
                     </div>
                   </button>
                 );
@@ -218,94 +270,121 @@ export default function MensajesPanelPage() {
           </div>
         </div>
 
-        {/* Ventana de Mensajes Activa */}
+        {/* Active Chat Conversation Pane */}
         <div className="flex-1 flex flex-col h-full bg-white">
           {conversacionActiva ? (
             <>
-              {/* Header de la conversación */}
-              <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-white shadow-xs">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm">
-                    {getInterlocutor(conversacionActiva).charAt(0)}
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+                <div className="flex items-center space-x-3.5">
+                  <div className="relative">
+                    <div className="w-11 h-11 rounded-2xl bg-slate-900 text-white font-black flex items-center justify-center text-base shadow-sm">
+                      {getInterlocutor(conversacionActiva).charAt(0).toUpperCase()}
+                    </div>
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-gray-900">
-                      {getInterlocutor(conversacionActiva)}
-                    </h3>
-                    <span className="text-xs text-gray-500">
-                      Consulta sobre: <strong className="text-gray-700">{conversacionActiva.comercioId?.nombre}</strong>
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-bold text-sm text-slate-900">
+                        {getInterlocutor(conversacionActiva)}
+                      </h3>
+                      <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200">
+                        Vecino
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1.5 text-xs text-slate-500 mt-0.5">
+                      <span>Interesado en:</span>
+                      <span className="font-bold text-slate-800">{conversacionActiva.comercioId?.nombre}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-1.5 text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                  <span>Chat en vivo</span>
+
+                <div className="flex items-center space-x-2">
+                  <span className="inline-flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-100">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span>Canal Activo</span>
+                  </span>
                 </div>
               </div>
 
-              {/* Lista de Mensajes */}
-              <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50/50">
-                {mensajes.map((m, idx) => {
-                  const emisorId = typeof m.emisorId === 'object' ? m.emisorId?._id : m.emisorId;
-                  const esMio = currentUser?._id && emisorId === currentUser._id;
-                  const nombreEmisor = typeof m.emisorId === 'object' ? m.emisorId?.nombre : 'Usuario';
+              {/* Messages Body */}
+              <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/40">
+                {mensajes.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2">
+                    <Sparkles className="w-8 h-8 text-indigo-400 stroke-[1.5]" />
+                    <p className="text-xs font-semibold text-slate-600">Inicia la conversación</p>
+                    <p className="text-[11px] text-slate-400">Responde con amabilidad y brinda detalles sobre tus productos o servicios.</p>
+                  </div>
+                ) : (
+                  mensajes.map((m, idx) => {
+                    const emisorId = typeof m.emisorId === 'object' ? m.emisorId?._id : m.emisorId;
+                    const esMio = currentUser?._id && emisorId === currentUser._id;
+                    const nombreEmisor = typeof m.emisorId === 'object' ? m.emisorId?.nombre : 'Usuario';
 
-                  return (
-                    <div
-                      key={m._id || idx}
-                      className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}
-                    >
-                      <span className="text-[10px] text-gray-400 mb-0.5 ml-1 font-medium">
-                        {esMio ? 'Tú (Comerciante)' : nombreEmisor}
-                      </span>
+                    return (
                       <div
-                        className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-xs ${
-                          esMio
-                            ? 'bg-indigo-600 text-white rounded-br-none'
-                            : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
-                        }`}
+                        key={m._id || idx}
+                        className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}
                       >
-                        <p className="whitespace-pre-wrap break-words">{m.contenido}</p>
-                        <span
-                          className={`text-[9px] block text-right mt-1 ${
-                            esMio ? 'text-indigo-200' : 'text-gray-400'
+                        <span className="text-[10px] text-slate-400 mb-1 px-1 font-medium">
+                          {esMio ? 'Tú (Comercio)' : nombreEmisor}
+                        </span>
+                        <div
+                          className={`max-w-[75%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-sm ${
+                            esMio
+                              ? 'bg-indigo-600 text-white rounded-br-xs'
+                              : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
                           }`}
                         >
-                          {m.createdAt
-                            ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                            : 'Ahora'}
-                        </span>
+                          <p className="whitespace-pre-wrap break-words">{m.contenido}</p>
+                          <div
+                            className={`text-[9px] flex items-center justify-end space-x-1 mt-1 font-medium ${
+                              esMio ? 'text-indigo-200' : 'text-slate-400'
+                            }`}
+                          >
+                            <span>
+                              {m.createdAt
+                                ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                : 'Ahora'}
+                            </span>
+                            {esMio && <CheckCheck className="w-3 h-3 text-indigo-300" />}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input para responder */}
-              <form onSubmit={handleEnviar} className="p-3 border-t border-gray-200 flex items-center space-x-2 bg-white">
+              {/* Compose Message Bar */}
+              <form onSubmit={handleEnviar} className="p-4 border-t border-slate-100 bg-white flex items-center space-x-2">
                 <input
                   type="text"
-                  placeholder="Escribe una respuesta para el cliente..."
+                  placeholder="Escribe tu respuesta al vecino..."
                   value={nuevoMensaje}
                   onChange={(e) => setNuevoMensaje(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs text-gray-900 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all"
                 />
                 <button
                   type="submit"
                   disabled={!nuevoMensaje.trim()}
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl text-xs shadow-xs transition-colors flex items-center space-x-1.5"
+                  className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold rounded-2xl text-xs shadow-md shadow-indigo-600/20 transition-all flex items-center space-x-2"
                 >
+                  <span>Enviar</span>
                   <Send className="w-3.5 h-3.5" />
-                  <span>Responder</span>
                 </button>
               </form>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
-              <MessageSquare className="w-12 h-12 text-gray-300 mb-2" />
-              <p className="text-sm font-semibold text-gray-600">Selecciona una conversación</p>
-              <p className="text-xs text-gray-400">Podrás responder dudas de los vecinos en tiempo real.</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-400 space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
+                <MessageSquare className="w-7 h-7 stroke-[1.5]" />
+              </div>
+              <p className="text-sm font-bold text-slate-700">Selecciona una conversación</p>
+              <p className="text-xs text-slate-400 max-w-sm">
+                Podrás responder consultas de precios, horarios y disponibilidad con tus clientes vecinos en tiempo real.
+              </p>
             </div>
           )}
         </div>
