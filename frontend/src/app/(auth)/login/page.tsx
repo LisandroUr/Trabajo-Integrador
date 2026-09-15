@@ -93,8 +93,11 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <div className="text-center mt-4">
-          <Link href="/registro" className="text-sm text-blue-600 hover:text-blue-500">
+        <div className="flex flex-col space-y-2 text-center mt-4 text-xs">
+          <Link href="/olvide-password" className="text-gray-500 hover:text-blue-600">
+            ¿Olvidaste tu contraseña?
+          </Link>
+          <Link href="/registro" className="text-blue-600 font-semibold hover:underline">
             ¿No tienes cuenta? Regístrate aquí
           </Link>
         </div>

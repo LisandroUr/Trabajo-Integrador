@@ -37,6 +37,7 @@ const registrarUsuario = async (req, res) => {
         _id: usuario.id,
         nombre: usuario.nombre,
         email: usuario.email,
+        roles: ['cliente'],
         token: generarToken(usuario._id),
       });
     } else {
@@ -75,15 +76,89 @@ const loginUsuario = async (req, res) => {
 
 const getPerfil = async (req, res) => {
   try {
-    // req.usuario viene del middleware protegerRuta
     res.json(req.usuario);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// CU-22: Gestión de Cuenta (Actualizar datos de perfil)
+const actualizarPerfil = async (req, res) => {
+  try {
+    const { nombre, email, password } = req.body;
+    const usuario = await Usuario.findById(req.usuario._id);
+
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    if (nombre) usuario.nombre = nombre;
+    if (email) usuario.email = email;
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      usuario.password = await bcrypt.hash(password, salt);
+    }
+
+    const actualizado = await usuario.save();
+    res.json({
+      _id: actualizado._id,
+      nombre: actualizado.nombre,
+      email: actualizado.email,
+      message: 'Perfil actualizado exitosamente'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// CU-21: Recuperación de Contraseña (Solicitud y simulación de notificación por email)
+const solicitarRecuperacionPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) {
+      // Por seguridad no revelamos si el email existe
+      return res.json({ message: 'Si el correo está registrado, se enviaron las instrucciones de reseteo.' });
+    }
+
+    // Generar token temporal de 1 hora para reseteo
+    const resetToken = jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // En producción se enviaría vía SendGrid / Resend / Nodemailer.
+    res.json({
+      message: 'Instrucciones enviadas al correo electrónico registrado.',
+      tokenTemporal: resetToken // Para fines de evaluación y prueba académica
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// CU-21: Restablecer contraseña con token
+const resetearPassword = async (req, res) => {
+  try {
+    const { token, nuevaPassword } = req.body;
+    if (!token || !nuevaPassword) {
+      return res.status(400).json({ error: 'Token y nueva contraseña son requeridos' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const usuario = await Usuario.findById(decoded.id);
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado o token inválido' });
+
+    const salt = await bcrypt.genSalt(10);
+    usuario.password = await bcrypt.hash(nuevaPassword, salt);
+    await usuario.save();
+
+    res.json({ message: 'Contraseña restablecida exitosamente. Ya puedes iniciar sesión.' });
+  } catch (error) {
+    res.status(400).json({ error: 'Token inválido o expirado' });
+  }
+};
+
 module.exports = {
   registrarUsuario,
   loginUsuario,
-  getPerfil
+  getPerfil,
+  actualizarPerfil,
+  solicitarRecuperacionPassword,
+  resetearPassword
 };

@@ -1,15 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { registrarUsuario, loginUsuario, getPerfil } = require('../controllers/authController');
+const { 
+  registrarUsuario, 
+  loginUsuario, 
+  getPerfil,
+  actualizarPerfil,
+  solicitarRecuperacionPassword,
+  resetearPassword
+} = require('../controllers/authController');
 const { protegerRuta } = require('../middlewares/authMiddleware');
 
-// /api/auth/registro
+// Público
 router.post('/registro', registrarUsuario);
-
-// /api/auth/login
 router.post('/login', loginUsuario);
+router.post('/olvide-password', solicitarRecuperacionPassword);
+router.post('/reset-password', resetearPassword);
 
-// /api/auth/perfil - Ruta protegida
+// Autenticado
 router.get('/perfil', protegerRuta, getPerfil);
+router.put('/perfil', protegerRuta, actualizarPerfil);
 
 module.exports = router;
