@@ -185,7 +185,7 @@ export default function ComercioDetallePage({ params }: { params: Promise<{ id: 
       <div className="p-6 sm:p-8 rounded-2xl bg-[#171b22] border border-[#232833] flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div className="flex items-start space-x-4">
           <div className="w-16 h-16 rounded-xl bg-[#1f2633] border border-[#2b3547] text-[#9cb1ce] flex items-center justify-center text-2xl font-semibold flex-shrink-0">
-            {comercio.nombre.charAt(0).toUpperCase()}
+            {(comercio?.nombre || 'C').charAt(0).toUpperCase()}
           </div>
 
           <div>
@@ -198,7 +198,7 @@ export default function ComercioDetallePage({ params }: { params: Promise<{ id: 
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-semibold text-[#e2e5eb]">
-              {comercio.nombre}
+              {comercio?.nombre || 'Comercio'}
             </h1>
 
             <p className="text-xs text-[#8d94a1] mt-1.5 max-w-xl leading-relaxed">
@@ -393,12 +393,12 @@ export default function ComercioDetallePage({ params }: { params: Promise<{ id: 
                     {r.respuestaComerciante && (
                       <div className="mt-1 pl-2 border-l border-[#3d5a7d] text-[11px] text-[#78808f]">
                         <span className="text-[#9cb1ce] block font-medium">Respuesta:</span>
-                        <span>{r.respuestaComerciante.contenido}</span>
+                        <span>{typeof r.respuestaComerciante === 'object' ? (r.respuestaComerciante as any)?.contenido : r.respuestaComerciante}</span>
                       </div>
                     )}
 
                     <div className="flex items-center justify-between pt-1 text-[10px] text-[#5f6674]">
-                      <span>{new Date(r.createdAt).toLocaleDateString()}</span>
+                      <span>{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Reciente'}</span>
                       <button
                         onClick={() => handleReportarResena(r._id)}
                         className="hover:text-[#d48a97] transition-colors"

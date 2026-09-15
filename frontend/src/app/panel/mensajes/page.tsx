@@ -238,7 +238,7 @@ export default function MensajesPanelPage() {
                   >
                     <div className="relative flex-shrink-0">
                       <div className="w-9 h-9 rounded-xl bg-[#262d3a] text-[#d5d9e0] font-bold flex items-center justify-center text-xs">
-                        {nombreCliente.charAt(0).toUpperCase()}
+                        {(nombreCliente || 'C').charAt(0).toUpperCase()}
                       </div>
                       <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[#4a7c59] border-2 border-[#12151b] rounded-full"></span>
                     </div>
@@ -278,7 +278,7 @@ export default function MensajesPanelPage() {
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <div className="w-9 h-9 rounded-xl bg-[#4b6cb7] text-[#d5d9e0] font-bold flex items-center justify-center text-sm">
-                      {getInterlocutor(conversacionActiva).charAt(0).toUpperCase()}
+                      {(getInterlocutor(conversacionActiva) || 'C').charAt(0).toUpperCase()}
                     </div>
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#4a7c59] border-2 border-[#14181f] rounded-full"></span>
                   </div>

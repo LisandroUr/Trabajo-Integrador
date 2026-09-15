@@ -174,7 +174,7 @@ export default function BuscarPage() {
               <div>
                 <div className="flex items-start justify-between mb-3">
                   <div className="w-10 h-10 rounded-lg bg-[#1f2633] border border-[#2b3547] text-[#9cb1ce] flex items-center justify-center font-medium text-sm">
-                    {comercio.nombre.charAt(0).toUpperCase()}
+                    {(comercio?.nombre || 'C').charAt(0).toUpperCase()}
                   </div>
                   <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-[#1e2a23] border border-[#2b3e34] text-[#8bb59b] text-[10px] font-medium">
                     <ShieldCheck className="w-3 h-3" />
@@ -239,7 +239,7 @@ export default function BuscarPage() {
             >
               <div className="flex items-center space-x-3.5">
                 <div className="w-9 h-9 rounded-lg bg-[#1f2633] border border-[#2b3547] text-[#9cb1ce] flex items-center justify-center font-medium text-xs flex-shrink-0">
-                  {comercio.nombre.charAt(0).toUpperCase()}
+                  {(comercio?.nombre || 'C').charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <div className="flex items-center space-x-2">

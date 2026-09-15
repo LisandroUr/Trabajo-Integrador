@@ -212,7 +212,7 @@ export default function PanelComerciantePage() {
                 <div>
                   <div className="flex items-start justify-between mb-3">
                     <div className="w-10 h-10 rounded-xl bg-[#1d222b] border border-[#262d3a] text-[#7dafb5] font-bold text-sm flex items-center justify-center">
-                      {comercio.nombre.charAt(0).toUpperCase()}
+                      {(comercio?.nombre || 'C').charAt(0).toUpperCase()}
                     </div>
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center space-x-1.5 ${

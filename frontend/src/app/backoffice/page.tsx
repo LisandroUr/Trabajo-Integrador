@@ -338,7 +338,7 @@ export default function BackofficePage() {
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-3">
                             <div className="w-9 h-9 rounded-xl bg-[#1d222b] border border-[#262d3a] text-[#7dafb5] font-bold flex items-center justify-center text-xs flex-shrink-0">
-                              {comercio.nombre.charAt(0).toUpperCase()}
+                              {(comercio?.nombre || 'C').charAt(0).toUpperCase()}
                             </div>
                             <div>
                               <div className="font-bold text-[#d5d9e0] text-sm">{comercio.nombre}</div>
