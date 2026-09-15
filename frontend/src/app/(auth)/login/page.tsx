@@ -27,7 +27,7 @@ export default function LoginPage() {
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
-      toast.success(`¡Bienvenido de nuevo, ${data.nombre}!`);
+      toast.success(`Bienvenido de nuevo, ${data.nombre}`);
 
       if (data.roles.includes('superadmin') || data.roles.includes('moderador')) {
         router.push('/backoffice');
@@ -44,34 +44,34 @@ export default function LoginPage() {
 
   return (
     <div>
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-black text-white tracking-tight">Iniciar Sesión</h2>
-        <p className="mt-1 text-xs text-slate-400">
+      <div className="text-center mb-6">
+        <h2 className="text-xl font-bold text-[#d5d9e0] tracking-tight">Iniciar Sesión</h2>
+        <p className="mt-1 text-xs text-[#8d94a1]">
           Ingresa a tu panel comercial, auditoría o cuenta vecinal
         </p>
       </div>
       
       <form className="space-y-4" onSubmit={handleSubmit}>
         {error && (
-          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 p-3.5 rounded-2xl text-xs font-semibold flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
+          <div className="badge-wine p-3 rounded-xl text-xs font-semibold flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-[#d48a97]" />
             <span>{error}</span>
           </div>
         )}
         
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[#8d94a1] uppercase tracking-wider mb-1">
               Correo Electrónico
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8d94a1]" />
               <input
                 id="email-address"
                 name="email"
                 type="email"
                 required
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-white/10 rounded-2xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7] transition-colors"
                 placeholder="ejemplo@municipio.gob.ar"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -80,22 +80,22 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-[#8d94a1] uppercase tracking-wider">
                 Contraseña
               </label>
-              <Link href="/olvide-password" className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold hover:underline">
+              <Link href="/olvide-password" className="text-[11px] text-[#7dafb5] hover:underline font-medium">
                 ¿Olvidaste tu clave?
               </Link>
             </div>
             <div className="relative">
-              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8d94a1]" />
               <input
                 id="password"
                 name="password"
                 type="password"
                 required
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-white/10 rounded-2xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7] transition-colors"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -107,7 +107,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full mt-2 py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+          className="w-full mt-2 py-2.5 px-4 rounded-xl bg-[#4b6cb7] hover:bg-[#3d5a99] text-[#d5d9e0] text-xs font-semibold transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
         >
           {loading ? (
             <>
@@ -122,10 +122,10 @@ export default function LoginPage() {
           )}
         </button>
 
-        <div className="pt-4 border-t border-white/5 text-center">
-          <p className="text-xs text-slate-400">
+        <div className="pt-4 border-t border-[#262d3a] text-center">
+          <p className="text-xs text-[#8d94a1]">
             ¿No posees una cuenta registrada?{' '}
-            <Link href="/registro" className="text-indigo-400 font-bold hover:underline">
+            <Link href="/registro" className="text-[#7dafb5] font-semibold hover:underline">
               Crea tu vidriera aquí
             </Link>
           </p>

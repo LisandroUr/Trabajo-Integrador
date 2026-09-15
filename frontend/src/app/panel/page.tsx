@@ -18,8 +18,6 @@ import {
   AlertCircle,
   ShieldCheck,
   ArrowRight,
-  TrendingUp,
-  Layers,
   Sparkles
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -82,13 +80,13 @@ export default function PanelComerciantePage() {
 
       try {
         confetti({
-          particleCount: 100,
-          spread: 70,
+          particleCount: 80,
+          spread: 60,
           origin: { y: 0.6 }
         });
       } catch {}
 
-      toast.success('¡Solicitud de vidriera digital enviada a auditoría municipal!');
+      toast.success('Solicitud de vidriera digital enviada a auditoría municipal');
       setShowForm(false);
       setNombre('');
       setDescripcion('');
@@ -109,17 +107,17 @@ export default function PanelComerciantePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/70 to-slate-900 border border-white/10 p-8 sm:p-12 mb-10 shadow-2xl backdrop-blur-xl">
+      <div className="rounded-2xl bg-[#171b22] border border-[#262d3a] p-8 sm:p-10 mb-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">
-              <Store className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full badge-steel text-xs font-semibold tracking-wider mb-3">
+              <Store className="w-3.5 h-3.5" />
               <span>Portal de Autogestión Comercial</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#d5d9e0] tracking-tight">
               Mis Vidrieras & Catálogos
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <p className="mt-2 text-xs sm:text-sm text-[#8d94a1] leading-relaxed">
               Administra tus tiendas, publica productos con precios actualizados para el observatorio y responde consultas de vecinos en tiempo real.
             </p>
           </div>
@@ -127,15 +125,15 @@ export default function PanelComerciantePage() {
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/panel/mensajes"
-              className="px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 text-xs font-bold transition-all flex items-center space-x-2"
+              className="px-4 py-2.5 rounded-xl bg-[#1d222b] hover:bg-[#232934] text-[#d5d9e0] border border-[#262d3a] text-xs font-semibold transition-colors flex items-center space-x-2"
             >
-              <MessageSquare className="w-4 h-4 text-indigo-400" />
+              <MessageSquare className="w-4 h-4 text-[#7dafb5]" />
               <span>Bandeja de Consultas</span>
             </Link>
 
             <button
               onClick={() => setShowForm(true)}
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all flex items-center space-x-2"
+              className="px-4 py-2.5 rounded-xl bg-[#4b6cb7] hover:bg-[#3d5a99] text-[#d5d9e0] text-xs font-semibold transition-colors flex items-center space-x-2"
             >
               <Plus className="w-4 h-4" />
               <span>Nueva Vidriera</span>
@@ -145,63 +143,63 @@ export default function PanelComerciantePage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
-        <div className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+        <div className="p-5 rounded-2xl bg-[#171b22] border border-[#262d3a] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Locales</span>
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold">
-              <Store className="w-5 h-5" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#8d94a1]">Total Locales</span>
+            <div className="w-9 h-9 rounded-xl bg-[#1d222b] border border-[#262d3a] text-[#7dafb5] flex items-center justify-center font-bold">
+              <Store className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-black text-white mt-3 tabular-nums">{comercios.length}</p>
-          <p className="text-xs text-slate-400 mt-1">Establecimientos asociados a tu cuenta</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#d5d9e0] mt-3 tabular-nums">{comercios.length}</p>
+          <p className="text-xs text-[#8d94a1] mt-1">Establecimientos asociados a tu cuenta</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-slate-900/70 border border-emerald-500/30 shadow-xl backdrop-blur-xl">
+        <div className="p-5 rounded-2xl bg-[#171b22] border border-[#262d3a] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Vidrieras Activas</span>
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold">
-              <CheckCircle2 className="w-5 h-5" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#8bb59b]">Vidrieras Activas</span>
+            <div className="w-9 h-9 rounded-xl badge-sage flex items-center justify-center font-bold">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-black text-emerald-400 mt-3 tabular-nums">{aprobados}</p>
-          <p className="text-xs text-slate-400 mt-1">Visibles para los vecinos y en el ranking</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#8bb59b] mt-3 tabular-nums">{aprobados}</p>
+          <p className="text-xs text-[#8d94a1] mt-1">Visibles para los vecinos y en el ranking</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-slate-900/70 border border-amber-500/30 shadow-xl backdrop-blur-xl">
+        <div className="p-5 rounded-2xl bg-[#171b22] border border-[#262d3a] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">En Fiscalización</span>
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold">
-              <Clock className="w-5 h-5" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#d1ab77]">En Fiscalización</span>
+            <div className="w-9 h-9 rounded-xl badge-ochre flex items-center justify-center font-bold">
+              <Clock className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-black text-amber-400 mt-3 tabular-nums">{pendientes}</p>
-          <p className="text-xs text-slate-400 mt-1">En espera de resolución municipal</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#d1ab77] mt-3 tabular-nums">{pendientes}</p>
+          <p className="text-xs text-[#8d94a1] mt-1">En espera de resolución municipal</p>
         </div>
       </div>
 
       {/* Stores List */}
       {loading ? (
-        <div className="p-20 text-center text-slate-400">
-          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sm font-semibold">Cargando tus establecimientos...</p>
+        <div className="p-16 text-center text-[#8d94a1]">
+          <div className="w-8 h-8 border-2 border-[#4b6cb7] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-xs font-semibold">Cargando tus establecimientos...</p>
         </div>
       ) : comercios.length === 0 ? (
-        <div className="p-16 rounded-3xl bg-slate-900/50 border border-white/5 text-center text-slate-400">
-          <Store className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-white">Aún no registraste ninguna vidriera digital</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+        <div className="p-12 rounded-2xl bg-[#171b22] border border-[#262d3a] text-center text-[#8d94a1]">
+          <Store className="w-10 h-10 text-[#8d94a1] mx-auto mb-3" />
+          <h3 className="text-base font-bold text-[#d5d9e0]">Aún no registraste ninguna vidriera digital</h3>
+          <p className="text-xs text-[#8d94a1] mt-1 max-w-sm mx-auto">
             Da de alta tu primer comercio para empezar a publicar precios y conectar con los vecinos.
           </p>
           <button
             onClick={() => setShowForm(true)}
-            className="mt-6 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold"
+            className="mt-5 px-4 py-2 bg-[#4b6cb7] hover:bg-[#3d5a99] text-[#d5d9e0] rounded-xl text-xs font-semibold transition-colors"
           >
             Crear Primera Vidriera
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {comercios.map((comercio) => {
             const esAprobado = comercio.estado === 'aprobado';
             const esPendiente = comercio.estado === 'pendiente';
@@ -209,49 +207,49 @@ export default function PanelComerciantePage() {
             return (
               <div
                 key={comercio._id}
-                className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 hover:border-indigo-500/40 transition-all shadow-xl backdrop-blur-xl flex flex-col justify-between group"
+                className="p-5 rounded-2xl bg-[#171b22] border border-[#262d3a] hover:border-[#4b6cb7]/50 transition-colors shadow-xs flex flex-col justify-between group"
               >
                 <div>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-black text-lg flex items-center justify-center">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#1d222b] border border-[#262d3a] text-[#7dafb5] font-bold text-sm flex items-center justify-center">
                       {comercio.nombre.charAt(0).toUpperCase()}
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider inline-flex items-center space-x-1.5 ${
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center space-x-1.5 ${
                         esAprobado
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                          ? 'badge-sage'
                           : esPendiente
-                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse'
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                          ? 'badge-ochre'
+                          : 'badge-wine'
                       }`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${
-                        esAprobado ? 'bg-emerald-400' : esPendiente ? 'bg-amber-400' : 'bg-rose-400'
+                        esAprobado ? 'bg-[#4a7c59]' : esPendiente ? 'bg-[#b8860b]' : 'bg-[#8b3a4a]'
                       }`} />
                       <span>{comercio.estado}</span>
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-black text-white group-hover:text-indigo-300 transition-colors">
+                  <h3 className="text-base font-bold text-[#d5d9e0] group-hover:text-[#9cb1ce] transition-colors">
                     {comercio.nombre}
                   </h3>
 
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                    {comercio.descripcion || 'Sin descripción.'}
+                  <p className="text-xs text-[#8d94a1] mt-1 line-clamp-2 leading-relaxed">
+                    {comercio.descripcion || 'Sin descripción registrada.'}
                   </p>
 
                   {comercio.direccion && (
-                    <div className="mt-3 flex items-center space-x-1.5 text-xs text-slate-400">
-                      <MapPin className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                    <div className="mt-3 flex items-center space-x-1.5 text-xs text-[#8d94a1]">
+                      <MapPin className="w-3.5 h-3.5 text-[#4b6cb7] flex-shrink-0" />
                       <span className="truncate">{comercio.direccion}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-6 pt-5 border-t border-white/5 space-y-2">
+                <div className="mt-5 pt-4 border-t border-[#262d3a] space-y-2">
                   <Link
                     href={`/panel/comercio/${comercio._id}`}
-                    className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center space-x-1.5"
+                    className="w-full py-2 rounded-xl bg-[#4b6cb7] hover:bg-[#3d5a99] text-[#d5d9e0] font-semibold text-xs transition-colors flex items-center justify-center space-x-1.5"
                   >
                     <Package className="w-3.5 h-3.5" />
                     <span>Administrar Catálogo</span>
@@ -260,7 +258,7 @@ export default function PanelComerciantePage() {
                   {esAprobado && (
                     <Link
                       href={`/comercio/${comercio._id}`}
-                      className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs font-semibold transition-all flex items-center justify-center space-x-1.5"
+                      className="w-full py-2 rounded-xl bg-[#1d222b] hover:bg-[#232934] text-[#8d94a1] hover:text-[#d5d9e0] border border-[#262d3a] text-xs font-semibold transition-colors flex items-center justify-center space-x-1.5"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>Ver Vidriera Pública</span>
@@ -275,92 +273,92 @@ export default function PanelComerciantePage() {
 
       {/* New Store Request Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-white/15 rounded-3xl max-w-lg w-full p-8 shadow-2xl relative">
+        <div className="fixed inset-0 bg-[#0d0f14]/80 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-[#171b22] border border-[#262d3a] rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-xl relative">
             <button
               onClick={() => setShowForm(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-white p-1 rounded-xl hover:bg-white/5"
+              className="absolute top-5 right-5 text-[#8d94a1] hover:text-[#d5d9e0] p-1 rounded-lg hover:bg-[#1d222b]"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="mb-6">
-              <h3 className="text-xl font-black text-white">Solicitud de Nueva Vidriera</h3>
-              <p className="text-xs text-slate-400 mt-1">
-                La solicitud pasará por la auditoría de la Dirección de Comercio municipal.
+            <div className="mb-5">
+              <h3 className="text-lg font-bold text-[#d5d9e0]">Solicitud de Nueva Vidriera</h3>
+              <p className="text-xs text-[#8d94a1] mt-1">
+                La solicitud pasará por la fiscalización de la Dirección de Comercio municipal.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">Nombre de Fantasía *</label>
+                <label className="block text-xs font-semibold text-[#8d94a1] mb-1">Nombre de Fantasía *</label>
                 <input
                   type="text"
                   required
                   placeholder="ej. Panadería La Espiga"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  className="w-full p-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                  className="w-full p-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">Descripción del Negocio</label>
+                <label className="block text-xs font-semibold text-[#8d94a1] mb-1">Descripción del Negocio</label>
                 <textarea
                   rows={2}
                   placeholder="Breve reseña de la actividad y especialidades..."
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
-                  className="w-full p-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full p-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7] resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">Dirección en Bahía Blanca</label>
+                <label className="block text-xs font-semibold text-[#8d94a1] mb-1">Dirección en Bahía Blanca</label>
                 <input
                   type="text"
                   placeholder="ej. Alsina 150"
                   value={direccion}
                   onChange={(e) => setDireccion(e.target.value)}
-                  className="w-full p-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                  className="w-full p-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-1">Teléfono</label>
+                  <label className="block text-xs font-semibold text-[#8d94a1] mb-1">Teléfono</label>
                   <input
                     type="text"
                     placeholder="291-..."
                     value={telefono}
                     onChange={(e) => setTelefono(e.target.value)}
-                    className="w-full p-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                    className="w-full p-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-1">WhatsApp</label>
+                  <label className="block text-xs font-semibold text-[#8d94a1] mb-1">WhatsApp</label>
                   <input
                     type="text"
                     placeholder="291-..."
                     value={whatsapp}
                     onChange={(e) => setWhatsapp(e.target.value)}
-                    className="w-full p-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                    className="w-full p-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7]"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-end space-x-3">
+              <div className="pt-3 flex items-center justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-xs font-medium text-[#8d94a1] hover:text-[#d5d9e0]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={enviando || !nombre.trim()}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all"
+                  className="px-4 py-2 rounded-xl bg-[#4b6cb7] hover:bg-[#3d5a99] text-[#d5d9e0] font-semibold text-xs transition-colors disabled:opacity-50"
                 >
                   {enviando ? 'Enviando...' : 'Enviar Solicitud'}
                 </button>

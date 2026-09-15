@@ -7,12 +7,9 @@ import {
   MessageSquare, 
   Send, 
   X, 
-  User, 
   Store, 
-  Clock, 
   CheckCheck,
-  Sparkles,
-  ShieldCheck
+  Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -140,23 +137,23 @@ export default function ChatWidget({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-full max-w-[390px] h-[540px] bg-slate-950/95 border border-white/15 rounded-3xl shadow-2xl backdrop-blur-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+    <div className="fixed bottom-6 right-6 z-50 w-full max-w-[380px] h-[520px] bg-[#171b22] border border-[#262d3a] rounded-2xl shadow-xl flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-4 bg-gradient-to-r from-slate-900 to-indigo-950 border-b border-white/10 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+      <div className="px-4 py-3 bg-[#14181f] border-b border-[#262d3a] flex items-center justify-between">
+        <div className="flex items-center space-x-2.5">
           <div className="relative">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-md shadow-indigo-600/30">
-              <Store className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-[#1d222b] border border-[#262d3a] text-[#7dafb5] font-bold flex items-center justify-center text-xs">
+              <Store className="w-4 h-4" />
             </div>
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-slate-950 rounded-full"></span>
+            <span className="absolute bottom-0 right-0 w-2 h-2 bg-[#4a7c59] border border-[#14181f] rounded-full"></span>
           </div>
 
           <div>
-            <h4 className="text-xs font-bold text-white max-w-[180px] truncate">
+            <h4 className="text-xs font-bold text-[#d5d9e0] max-w-[190px] truncate">
               {comercioNombre}
             </h4>
-            <div className="flex items-center space-x-1.5 text-[10px] text-emerald-400 font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div className="flex items-center space-x-1 text-[10px] text-[#8bb59b] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#4a7c59]"></span>
               <span>Canal directo en vivo</span>
             </div>
           </div>
@@ -164,24 +161,24 @@ export default function ChatWidget({
 
         <button
           onClick={onClose}
-          className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+          className="p-1 rounded-lg text-[#8d94a1] hover:text-[#d5d9e0] hover:bg-[#1d222b] transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-950/40">
+      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#12151b]">
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500 text-xs">
-            <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+          <div className="flex flex-col items-center justify-center h-full text-[#8d94a1] text-xs">
+            <div className="w-5 h-5 border-2 border-[#4b6cb7] border-t-transparent rounded-full animate-spin mb-2"></div>
             <span>Conectando sala segura...</span>
           </div>
         ) : mensajes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500 text-center px-6">
-            <Sparkles className="w-8 h-8 text-indigo-400 mb-2 stroke-[1.5]" />
-            <p className="text-xs font-bold text-white">Haz una consulta al comerciante</p>
-            <p className="text-[11px] text-slate-400 mt-1">
+          <div className="flex flex-col items-center justify-center h-full text-[#8d94a1] text-center px-4">
+            <Sparkles className="w-7 h-7 text-[#7dafb5] mb-2 stroke-[1.5]" />
+            <p className="text-xs font-bold text-[#d5d9e0]">Haz una consulta al comerciante</p>
+            <p className="text-[11px] text-[#8d94a1] mt-1">
               Pregunta por disponibilidad de stock, medios de pago o reservas de productos.
             </p>
           </div>
@@ -196,24 +193,24 @@ export default function ChatWidget({
                 key={m._id || idx}
                 className={`flex flex-col ${esMio ? 'items-end' : 'items-start'}`}
               >
-                <span className="text-[9px] text-slate-500 mb-1 px-1 font-medium">
+                <span className="text-[9px] text-[#8d94a1] mb-0.5 px-1 font-medium">
                   {esMio ? 'Tú' : nombreEmisor}
                 </span>
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-sm ${
+                  className={`max-w-[80%] rounded-xl px-3 py-2 text-xs leading-relaxed shadow-xs ${
                     esMio
-                      ? 'bg-indigo-600 text-white rounded-br-xs'
-                      : 'bg-slate-800 text-slate-200 border border-white/5 rounded-bl-xs'
+                      ? 'bg-[#2a374a] text-[#d5d9e0] border border-[#3b4c66]'
+                      : 'bg-[#1d222b] text-[#d5d9e0] border border-[#262d3a]'
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{m.contenido}</p>
-                  <div className="text-[9px] flex items-center justify-end space-x-1 mt-1 font-medium text-slate-400">
+                  <div className="text-[9px] flex items-center justify-end space-x-1 mt-1 font-medium text-[#8d94a1]">
                     <span>
                       {m.createdAt
                         ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                         : 'Ahora'}
                     </span>
-                    {esMio && <CheckCheck className="w-3 h-3 text-indigo-300" />}
+                    {esMio && <CheckCheck className="w-3 h-3 text-[#7dafb5]" />}
                   </div>
                 </div>
               </div>
@@ -224,18 +221,18 @@ export default function ChatWidget({
       </div>
 
       {/* Input Bar */}
-      <form onSubmit={handleEnviar} className="p-3 border-t border-white/10 bg-slate-900/90 flex items-center space-x-2">
+      <form onSubmit={handleEnviar} className="p-3 border-t border-[#262d3a] bg-[#14181f] flex items-center space-x-2">
         <input
           type="text"
           placeholder="Escribe tu mensaje..."
           value={nuevoMensaje}
           onChange={(e) => setNuevoMensaje(e.target.value)}
-          className="flex-1 px-3.5 py-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+          className="flex-1 px-3 py-2 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7]"
         />
         <button
           type="submit"
           disabled={!nuevoMensaje.trim()}
-          className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center"
+          className="p-2 rounded-xl bg-[#4b6cb7] hover:bg-[#3d5a99] disabled:opacity-40 text-[#d5d9e0] transition-colors flex items-center justify-center"
         >
           <Send className="w-3.5 h-3.5" />
         </button>

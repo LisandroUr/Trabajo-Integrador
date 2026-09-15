@@ -11,22 +11,19 @@ import {
   Clock, 
   Check, 
   Trash2,
-  BarChart3,
   Search,
   Calendar,
   Star,
   RefreshCw,
   PauseCircle,
-  Flag,
-  PieChart as PieChartIcon
+  Flag
 } from 'lucide-react';
 import {
   PieChart,
   Pie,
   Cell,
   Tooltip,
-  ResponsiveContainer,
-  Legend
+  ResponsiveContainer
 } from 'recharts';
 import { toast } from 'sonner';
 
@@ -59,7 +56,8 @@ interface ResenaReportada {
   createdAt: string;
 }
 
-const COLORS = ['#10b981', '#f59e0b', '#f43f5e', '#6366f1'];
+// Muted Municipal Palette (Sage, Ochre, Wine, Denim)
+const COLORS = ['#4a7c59', '#b8860b', '#8b3a4a', '#4b6cb7'];
 
 export default function BackofficePage() {
   const [tabActiva, setTabActiva] = useState<'comercios' | 'resenas'>('comercios');
@@ -96,7 +94,7 @@ export default function BackofficePage() {
     try {
       await fetchAPI(`/comercios/${id}/estado`, {
         method: 'PATCH',
-        body: JSON.stringify({ estado: nuevoEstado, motivo: motivo || `Actualizado por admin a ${nuevoEstado}` })
+        body: JSON.stringify({ estado: nuevoEstado, motivo: motivo || `Actualizado por fiscalización a ${nuevoEstado}` })
       });
       toast.success(`Estado del comercio actualizado a "${nuevoEstado}"`);
       loadData();
@@ -148,17 +146,17 @@ export default function BackofficePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* GovTech Institutional Hero */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-purple-950/60 to-slate-900 border border-white/10 p-8 sm:p-12 mb-10 shadow-2xl backdrop-blur-xl">
+      <div className="rounded-2xl bg-[#171b22] border border-[#262d3a] p-8 sm:p-10 mb-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-bold uppercase tracking-wider mb-4">
-              <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full badge-steel text-xs font-semibold tracking-wider mb-3">
+              <ShieldCheck className="w-3.5 h-3.5" />
               <span>Dirección de Comercio e Industria • Municipalidad de Bahía Blanca</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#d5d9e0] tracking-tight">
               Control & Fiscalización Cívica
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
+            <p className="mt-2 text-xs sm:text-sm text-[#8d94a1] leading-relaxed max-w-2xl">
               Panel institucional de admisión de vidrieras digitales, verificación normativa y moderación de comentarios de la ciudadanía.
             </p>
           </div>
@@ -166,61 +164,61 @@ export default function BackofficePage() {
           <button
             onClick={loadData}
             disabled={loading}
-            className="px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 text-xs font-bold transition-all flex items-center space-x-2 self-start md:self-auto"
+            className="px-4 py-2.5 rounded-xl bg-[#1d222b] hover:bg-[#232934] text-[#d5d9e0] border border-[#262d3a] text-xs font-semibold transition-colors flex items-center space-x-2 self-start md:self-auto"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-purple-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#7dafb5]' : ''}`} />
             <span>Actualizar Datos</span>
           </button>
         </div>
       </div>
 
       {/* KPI Cards & Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-10">
-        <div className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div className="p-5 rounded-2xl bg-[#171b22] border border-[#262d3a] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Solicitudes</span>
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold">
-              <Store className="w-5 h-5" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#8d94a1]">Total Solicitudes</span>
+            <div className="w-9 h-9 rounded-xl bg-[#1d222b] border border-[#262d3a] text-[#7dafb5] flex items-center justify-center font-bold">
+              <Store className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-black text-white mt-3 tabular-nums">{totalComercios}</p>
-          <p className="text-xs text-slate-400 mt-1">Registrados en el sistema</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#d5d9e0] mt-3 tabular-nums">{totalComercios}</p>
+          <p className="text-xs text-[#8d94a1] mt-1">Registrados en el sistema</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-slate-900/70 border border-amber-500/30 shadow-xl backdrop-blur-xl">
+        <div className="p-5 rounded-2xl bg-[#171b22] border border-[#262d3a] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Pendientes</span>
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold">
-              <Clock className="w-5 h-5" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#d1ab77]">Pendientes</span>
+            <div className="w-9 h-9 rounded-xl badge-ochre flex items-center justify-center font-bold">
+              <Clock className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-black text-amber-400 mt-3 tabular-nums">{pendientes}</p>
-          <p className="text-xs text-slate-400 mt-1">Requieren resolución de admisión</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#d1ab77] mt-3 tabular-nums">{pendientes}</p>
+          <p className="text-xs text-[#8d94a1] mt-1">Requieren resolución de admisión</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-slate-900/70 border border-rose-500/30 shadow-xl backdrop-blur-xl">
+        <div className="p-5 rounded-2xl bg-[#171b22] border border-[#262d3a] shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-400">Reseñas Reportadas</span>
-            <div className="w-10 h-10 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center font-bold">
-              <Flag className="w-5 h-5" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#d48a97]">Reseñas Reportadas</span>
+            <div className="w-9 h-9 rounded-xl badge-wine flex items-center justify-center font-bold">
+              <Flag className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-black text-rose-400 mt-3 tabular-nums">{resenasReportadas.length}</p>
-          <p className="text-xs text-slate-400 mt-1">En cola de fiscalización</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#d48a97] mt-3 tabular-nums">{resenasReportadas.length}</p>
+          <p className="text-xs text-[#8d94a1] mt-1">En cola de fiscalización</p>
         </div>
 
         {/* Mini Pie Chart */}
-        <div className="p-4 rounded-3xl bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl flex items-center justify-center">
-          <div className="h-28 w-full">
+        <div className="p-3 rounded-2xl bg-[#171b22] border border-[#262d3a] shadow-xs flex items-center justify-center">
+          <div className="h-24 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={25}
-                  outerRadius={45}
-                  paddingAngle={5}
+                  innerRadius={22}
+                  outerRadius={38}
+                  paddingAngle={4}
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
@@ -229,11 +227,11 @@ export default function BackofficePage() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0f172a',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '12px',
+                    backgroundColor: '#171b22',
+                    border: '1px solid #262d3a',
+                    borderRadius: '8px',
                     fontSize: '11px',
-                    color: '#fff'
+                    color: '#d5d9e0'
                   }}
                 />
               </PieChart>
@@ -243,13 +241,13 @@ export default function BackofficePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center space-x-3 border-b border-white/10 mb-8 pb-px">
+      <div className="flex items-center space-x-3 border-b border-[#262d3a] mb-6 pb-px">
         <button
           onClick={() => setTabActiva('comercios')}
-          className={`pb-4 px-4 font-bold text-xs uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-all ${
+          className={`pb-3 px-3 font-semibold text-xs uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-colors ${
             tabActiva === 'comercios'
-              ? 'border-purple-500 text-purple-400'
-              : 'border-transparent text-slate-400 hover:text-white'
+              ? 'border-[#4b6cb7] text-[#9cb1ce]'
+              : 'border-transparent text-[#8d94a1] hover:text-[#d5d9e0]'
           }`}
         >
           <Store className="w-4 h-4" />
@@ -258,10 +256,10 @@ export default function BackofficePage() {
 
         <button
           onClick={() => setTabActiva('resenas')}
-          className={`pb-4 px-4 font-bold text-xs uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-all ${
+          className={`pb-3 px-3 font-semibold text-xs uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-colors ${
             tabActiva === 'resenas'
-              ? 'border-purple-500 text-purple-400'
-              : 'border-transparent text-slate-400 hover:text-white'
+              ? 'border-[#4b6cb7] text-[#9cb1ce]'
+              : 'border-transparent text-[#8d94a1] hover:text-[#d5d9e0]'
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
@@ -271,25 +269,25 @@ export default function BackofficePage() {
 
       {/* Tab: Comercios */}
       {tabActiva === 'comercios' && (
-        <div className="bg-slate-900/80 rounded-3xl shadow-2xl border border-white/10 overflow-hidden backdrop-blur-xl">
+        <div className="bg-[#171b22] rounded-2xl shadow-xs border border-[#262d3a] overflow-hidden">
           {/* Table Header Filter Bar */}
-          <div className="p-6 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-950/40">
+          <div className="p-4 sm:p-5 border-b border-[#262d3a] flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#14181f]">
             <div>
-              <h3 className="font-bold text-base text-white">Registro General de Vidrieras</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Control de admisión, vigencia y cumplimiento normativo</p>
+              <h3 className="font-bold text-sm text-[#d5d9e0]">Registro General de Vidrieras</h3>
+              <p className="text-xs text-[#8d94a1] mt-0.5">Control de admisión, vigencia y cumplimiento normativo</p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               {/* Status Filter */}
-              <div className="flex items-center bg-slate-950 rounded-xl p-1 border border-white/10 text-xs">
+              <div className="flex items-center bg-[#12151b] rounded-xl p-1 border border-[#262d3a] text-xs">
                 {(['todos', 'pendiente', 'aprobado', 'rechazado', 'suspendido'] as const).map((est) => (
                   <button
                     key={est}
                     onClick={() => setEstadoFilter(est)}
-                    className={`px-2.5 py-1 rounded-lg font-semibold capitalize transition-all ${
+                    className={`px-2.5 py-1 rounded-lg font-semibold capitalize transition-colors ${
                       estadoFilter === est 
-                        ? 'bg-purple-600 text-white shadow-xs' 
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-[#4b6cb7] text-[#d5d9e0]' 
+                        : 'text-[#8d94a1] hover:text-[#d5d9e0]'
                     }`}
                   >
                     {est}
@@ -299,21 +297,21 @@ export default function BackofficePage() {
 
               {/* Search input */}
               <div className="relative">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#8d94a1]" />
                 <input
                   type="text"
                   placeholder="Buscar comercio..."
                   value={filterQuery}
                   onChange={(e) => setFilterQuery(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 bg-slate-900 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-500 transition-all"
+                  className="pl-8 pr-3 py-1.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7] transition-colors"
                 />
               </div>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-white/5">
-              <thead className="bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <table className="min-w-full divide-y divide-[#262d3a]">
+              <thead className="bg-[#12151b] text-[11px] font-bold text-[#8d94a1] uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-4 text-left">Comercio</th>
                   <th className="px-6 py-4 text-left">Fecha Registro</th>
@@ -321,10 +319,10 @@ export default function BackofficePage() {
                   <th className="px-6 py-4 text-right">Acciones de Auditoría</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-xs">
+              <tbody className="divide-y divide-[#262d3a] text-xs">
                 {comerciosFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
+                    <td colSpan={4} className="px-6 py-12 text-center text-[#8d94a1]">
                       No se encontraron comercios con los criterios seleccionados.
                     </td>
                   </tr>
@@ -336,38 +334,38 @@ export default function BackofficePage() {
                     const esSuspendido = comercio.estado === 'suspendido';
 
                     return (
-                      <tr key={comercio._id} className="hover:bg-white/5 transition-colors">
+                      <tr key={comercio._id} className="hover:bg-[#1d222b] transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-black flex items-center justify-center text-sm flex-shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-[#1d222b] border border-[#262d3a] text-[#7dafb5] font-bold flex items-center justify-center text-xs flex-shrink-0">
                               {comercio.nombre.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <div className="font-bold text-white text-sm">{comercio.nombre}</div>
-                              <div className="text-[11px] text-slate-400">{comercio.direccion || 'Sin dirección registrada'}</div>
+                              <div className="font-bold text-[#d5d9e0] text-sm">{comercio.nombre}</div>
+                              <div className="text-[11px] text-[#8d94a1]">{comercio.direccion || 'Sin dirección registrada'}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-slate-400 whitespace-nowrap">
+                        <td className="px-6 py-4 text-[#8d94a1] whitespace-nowrap">
                           <div className="flex items-center space-x-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                            <Calendar className="w-3.5 h-3.5 text-[#8d94a1]" />
                             <span>{new Date(comercio.createdAt).toLocaleDateString()}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`px-3 py-1 inline-flex items-center space-x-1.5 text-[10px] font-extrabold rounded-full uppercase tracking-wider ${
+                            className={`px-2.5 py-0.5 inline-flex items-center space-x-1.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${
                               esAprobado
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                ? 'badge-sage'
                                 : esPendiente
-                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse'
+                                ? 'badge-ochre'
                                 : esSuspendido
-                                ? 'bg-orange-500/10 text-orange-400 border border-orange-500/30'
-                                : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                                ? 'badge-ochre'
+                                : 'badge-wine'
                             }`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${
-                              esAprobado ? 'bg-emerald-400' : esPendiente ? 'bg-amber-400' : esSuspendido ? 'bg-orange-400' : 'bg-rose-400'
+                              esAprobado ? 'bg-[#4a7c59]' : esPendiente ? 'bg-[#b8860b]' : esSuspendido ? 'bg-[#b8860b]' : 'bg-[#8b3a4a]'
                             }`} />
                             <span>{comercio.estado}</span>
                           </span>
@@ -376,7 +374,7 @@ export default function BackofficePage() {
                           {!esAprobado && (
                             <button
                               onClick={() => cambiarEstado(comercio._id, 'aprobado')}
-                              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/30 transition-all inline-flex items-center space-x-1.5"
+                              className="px-3 py-1.5 bg-[#4a7c59] hover:bg-[#3d664a] text-[#d5d9e0] rounded-lg text-xs font-semibold transition-colors inline-flex items-center space-x-1"
                             >
                               <Check className="w-3.5 h-3.5" />
                               <span>Aprobar</span>
@@ -385,7 +383,7 @@ export default function BackofficePage() {
                           {!esRechazado && (
                             <button
                               onClick={() => cambiarEstado(comercio._id, 'rechazado')}
-                              className="px-3.5 py-1.5 bg-white/5 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-semibold transition-all inline-flex items-center space-x-1.5"
+                              className="px-3 py-1.5 bg-[#1d222b] hover:bg-[#8b3a4a]/20 text-[#d48a97] border border-[#8b3a4a]/30 rounded-lg text-xs font-semibold transition-colors inline-flex items-center space-x-1"
                             >
                               <XCircle className="w-3.5 h-3.5" />
                               <span>Rechazar</span>
@@ -394,7 +392,7 @@ export default function BackofficePage() {
                           {esAprobado && (
                             <button
                               onClick={() => cambiarEstado(comercio._id, 'suspendido')}
-                              className="px-3.5 py-1.5 bg-white/5 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all inline-flex items-center space-x-1.5"
+                              className="px-3 py-1.5 bg-[#1d222b] hover:bg-[#b8860b]/20 text-[#d1ab77] border border-[#b8860b]/30 rounded-lg text-xs font-semibold transition-colors inline-flex items-center space-x-1"
                             >
                               <PauseCircle className="w-3.5 h-3.5" />
                               <span>Suspender</span>
@@ -413,71 +411,71 @@ export default function BackofficePage() {
 
       {/* Tab: Reseñas Reportadas */}
       {tabActiva === 'resenas' && (
-        <div className="bg-slate-900/80 rounded-3xl shadow-2xl border border-white/10 overflow-hidden backdrop-blur-xl">
-          <div className="p-6 border-b border-white/5 flex items-center justify-between bg-rose-500/10">
+        <div className="bg-[#171b22] rounded-2xl shadow-xs border border-[#262d3a] overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-[#262d3a] flex items-center justify-between bg-[#14181f]">
             <div>
-              <h3 className="font-bold text-base text-white">Bandeja de Moderación de Comentarios</h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <h3 className="font-bold text-sm text-[#d5d9e0]">Bandeja de Moderación de Comentarios</h3>
+              <p className="text-xs text-[#8d94a1] mt-0.5">
                 Reseñas reportadas por la comunidad por vocabulario impropio o contenido calumnioso.
               </p>
             </div>
-            <span className="bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold px-3 py-1 rounded-full text-xs">
+            <span className="badge-wine font-bold px-2.5 py-0.5 rounded-full text-xs">
               {resenasReportadas.length} reportes
             </span>
           </div>
 
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-[#262d3a]">
             {resenasReportadas.length === 0 ? (
-              <div className="p-16 text-center text-slate-400">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle2 className="w-7 h-7 stroke-[1.5]" />
+              <div className="p-12 text-center text-[#8d94a1]">
+                <div className="w-10 h-10 rounded-xl badge-sage flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-5 h-5 stroke-[1.5]" />
                 </div>
-                <p className="font-bold text-white text-sm">No hay reseñas reportadas pendientes</p>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="font-bold text-[#d5d9e0] text-sm">No hay reseñas reportadas pendientes</p>
+                <p className="text-xs text-[#8d94a1] mt-1">
                   La comunidad se mantiene en armonía y respeto mutuo.
                 </p>
               </div>
             ) : (
               resenasReportadas.map((r) => (
-                <div key={r._id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:bg-white/5 transition-colors">
+                <div key={r._id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#1d222b] transition-colors">
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <span className="font-bold text-[11px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-lg">
+                      <span className="font-bold text-[11px] badge-steel px-2 py-0.5 rounded-md">
                         {r.comercioId?.nombre || 'Comercio'}
                       </span>
-                      <span className="text-xs text-slate-400">
-                        Publicado por: <strong className="text-white">{r.usuarioId?.nombre || 'Vecino'}</strong> ({r.usuarioId?.email})
+                      <span className="text-xs text-[#8d94a1]">
+                        Publicado por: <strong className="text-[#d5d9e0]">{r.usuarioId?.nombre || 'Vecino'}</strong> ({r.usuarioId?.email})
                       </span>
-                      <div className="flex items-center space-x-0.5 text-amber-400 text-xs">
+                      <div className="flex items-center space-x-0.5 text-[#b8860b] text-xs">
                         {[1, 2, 3, 4, 5].map((s) => (
                           <Star 
                             key={s} 
-                            className={`w-3.5 h-3.5 ${s <= r.puntaje ? 'fill-amber-400 text-amber-400' : 'text-slate-700'}`} 
+                            className={`w-3.5 h-3.5 ${s <= r.puntaje ? 'fill-[#b8860b] text-[#b8860b]' : 'text-[#262d3a]'}`} 
                           />
                         ))}
                       </div>
                     </div>
                     
-                    <div className="text-xs text-slate-200 bg-slate-950 p-3.5 rounded-2xl border border-white/10 italic">
+                    <div className="text-xs text-[#d5d9e0] bg-[#12151b] p-3 rounded-xl border border-[#262d3a] italic">
                       "{r.comentario}"
                     </div>
 
-                    <span className="text-[10px] text-slate-500 mt-2 block font-medium">
+                    <span className="text-[10px] text-[#8d94a1] mt-2 block font-medium">
                       Fecha de reporte: {new Date(r.createdAt).toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex items-center space-x-2.5 flex-shrink-0">
+                  <div className="flex items-center space-x-2 flex-shrink-0">
                     <button
                       onClick={() => moderarResena(r._id, 'descartar')}
-                      className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 font-bold rounded-xl text-xs transition-colors flex items-center space-x-1.5"
+                      className="px-3 py-2 bg-[#1d222b] hover:bg-[#262d3a] text-[#8d94a1] hover:text-[#d5d9e0] border border-[#262d3a] font-semibold rounded-xl text-xs transition-colors flex items-center space-x-1.5"
                     >
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <Check className="w-3.5 h-3.5 text-[#8bb59b]" />
                       <span>Descartar Reporte</span>
                     </button>
                     <button
                       onClick={() => moderarResena(r._id, 'eliminar')}
-                      className="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs shadow-md shadow-rose-600/30 transition-all flex items-center space-x-1.5"
+                      className="px-3 py-2 bg-[#8b3a4a] hover:bg-[#722f3c] text-[#d5d9e0] font-semibold rounded-xl text-xs transition-colors flex items-center space-x-1.5"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Eliminar Reseña</span>

@@ -61,9 +61,9 @@ export default function OlvidePasswordPage() {
 
   return (
     <div>
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-black text-white tracking-tight">Recuperar Acceso</h2>
-        <p className="mt-1 text-xs text-slate-400">
+      <div className="text-center mb-6">
+        <h2 className="text-xl font-bold text-[#d5d9e0] tracking-tight">Recuperar Acceso</h2>
+        <p className="mt-1 text-xs text-[#8d94a1]">
           {paso === 1
             ? 'Ingresa tu correo para recibir un token de restablecimiento seguro.'
             : 'Ingresa el token recibido y define tu nueva contraseña.'}
@@ -71,15 +71,15 @@ export default function OlvidePasswordPage() {
       </div>
 
       {error && (
-        <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 p-3.5 rounded-2xl text-xs font-semibold mb-4 flex items-center space-x-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
+        <div className="badge-wine p-3 rounded-xl text-xs font-semibold mb-4 flex items-center space-x-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0 text-[#d48a97]" />
           <span>{error}</span>
         </div>
       )}
 
       {mensaje && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 p-3.5 rounded-2xl text-xs font-semibold mb-4 flex items-center space-x-2">
-          <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-400" />
+        <div className="badge-sage p-3 rounded-xl text-xs font-semibold mb-4 flex items-center space-x-2">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-[#8bb59b]" />
           <span>{mensaje}</span>
         </div>
       )}
@@ -87,18 +87,18 @@ export default function OlvidePasswordPage() {
       {paso === 1 ? (
         <form onSubmit={handleSolicitar} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[#8d94a1] uppercase tracking-wider mb-1">
               Correo Electrónico
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8d94a1]" />
               <input
                 type="email"
                 required
                 placeholder="tu-correo@ejemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-white/10 rounded-2xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7] transition-colors"
               />
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function OlvidePasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+            className="w-full py-2.5 px-4 rounded-xl bg-[#4b6cb7] hover:bg-[#3d5a99] text-[#d5d9e0] text-xs font-semibold transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -121,28 +121,28 @@ export default function OlvidePasswordPage() {
       ) : (
         <form onSubmit={handleReset} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[#8d94a1] uppercase tracking-wider mb-1">
               Token de Seguridad
             </label>
             <div className="relative">
-              <Key className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Key className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8d94a1]" />
               <input
                 type="text"
                 required
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 placeholder="Código recibido"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-white/10 rounded-2xl text-xs text-white font-mono focus:outline-none focus:border-indigo-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] font-mono focus:outline-none focus:border-[#4b6cb7] transition-colors"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[#8d94a1] uppercase tracking-wider mb-1">
               Nueva Contraseña
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8d94a1]" />
               <input
                 type="password"
                 required
@@ -150,7 +150,7 @@ export default function OlvidePasswordPage() {
                 placeholder="Mínimo 6 caracteres"
                 value={nuevaPassword}
                 onChange={(e) => setNuevaPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-white/10 rounded-2xl text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] focus:outline-none focus:border-[#4b6cb7] transition-colors"
               />
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function OlvidePasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+            className="w-full py-2.5 px-4 rounded-xl bg-[#4a7c59] hover:bg-[#3d664a] text-[#d5d9e0] text-xs font-semibold transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -172,10 +172,10 @@ export default function OlvidePasswordPage() {
         </form>
       )}
 
-      <div className="pt-6 mt-6 border-t border-white/5 text-center">
+      <div className="pt-5 mt-5 border-t border-[#262d3a] text-center">
         <Link 
           href="/login" 
-          className="inline-flex items-center space-x-1.5 text-xs text-slate-400 hover:text-indigo-400 font-semibold transition-colors"
+          className="inline-flex items-center space-x-1.5 text-xs text-[#8d94a1] hover:text-[#d5d9e0] font-semibold transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Volver a Iniciar Sesión</span>

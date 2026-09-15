@@ -4,17 +4,16 @@ import { useState, useEffect, useMemo } from 'react';
 import { fetchAPI } from '@/lib/api';
 import Link from 'next/link';
 import { 
-  BarChart3, 
-  TrendingDown, 
+  BarChart2, 
   Search, 
   Store, 
   ArrowUpRight, 
-  Filter, 
   ArrowUpDown,
-  DollarSign,
-  Award,
-  Sparkles,
-  PieChart as PieChartIcon,
+  TrendingDown,
+  Building,
+  Calendar,
+  Layers,
+  SlidersHorizontal,
   ChevronRight
 } from 'lucide-react';
 import {
@@ -105,7 +104,7 @@ export default function RankingPage() {
 
   // Chart data preparation
   const chartData = useMemo(() => {
-    return filteredItems.slice(0, 8).map((item) => ({
+    return filteredItems.slice(0, 7).map((item) => ({
       name: item.nombre.length > 14 ? item.nombre.slice(0, 14) + '...' : item.nombre,
       'Precio Mínimo': item.precioMin || 0,
       'Precio Promedio': Math.round(item.precioPromedio || 0),
@@ -119,137 +118,124 @@ export default function RankingPage() {
   }, [ranking]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-white/10 p-8 sm:p-12 mb-10 shadow-2xl">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">
-              <BarChart3 className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Observatorio Oficial de Precios de Bahía Blanca</span>
-            </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-              Ranking & Dispersión de Precios
-            </h1>
-            <p className="mt-3 text-sm text-slate-300 leading-relaxed">
-              Métricas comparativas calculadas automáticamente sobre los catálogos vigentes de los comercios de cercanía registrados.
-            </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      {/* Institutional Header Console */}
+      <div className="border-b border-[#232833] pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <div className="flex items-center space-x-2 text-xs font-medium text-[#7a93b5] mb-2">
+            <BarChart2 className="w-4 h-4" />
+            <span>Dirección de Estadística y Defensa del Consumidor</span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#e2e5eb]">
+            Observatorio Municipal de Precios
+          </h1>
+          <p className="text-xs text-[#8d94a1] mt-1 max-w-xl">
+            Relevamiento comparativo continuo sobre bienes de primera necesidad en comercios habilitados de Bahía Blanca.
+          </p>
+        </div>
 
-          <div className="flex items-center space-x-3 bg-slate-900/80 p-2 rounded-2xl border border-white/10 self-start md:self-auto">
-            <button
-              onClick={() => setViewMode('cards')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                viewMode === 'cards'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Tarjetas Detalladas
-            </button>
-            <button
-              onClick={() => setViewMode('chart')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                viewMode === 'chart'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <PieChartIcon className="w-3.5 h-3.5" />
-              <span>Gráfico Comparativo</span>
-            </button>
-          </div>
+        {/* View Switcher Tabs */}
+        <div className="flex items-center space-x-1 p-1 rounded-xl bg-[#171b22] border border-[#232833]">
+          <button
+            onClick={() => setViewMode('cards')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              viewMode === 'cards'
+                ? 'bg-[#252c38] text-[#e2e5eb]'
+                : 'text-[#8d94a1] hover:text-[#d5d9e0]'
+            }`}
+          >
+            Matriz de Artículos
+          </button>
+          <button
+            onClick={() => setViewMode('chart')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              viewMode === 'chart'
+                ? 'bg-[#252c38] text-[#e2e5eb]'
+                : 'text-[#8d94a1] hover:text-[#d5d9e0]'
+            }`}
+          >
+            Gráfico Analítico
+          </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
-        <div className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Canasta Relevada</span>
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold">
-              <Store className="w-5 h-5" />
-            </div>
-          </div>
-          <p className="text-3xl font-black text-white mt-3 tabular-nums">{ranking.length}</p>
-          <p className="text-xs text-slate-400 mt-1">Productos básicos con precios comparados</p>
+      {/* Analytical KPI Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="p-4 rounded-xl bg-[#171b22] border border-[#232833]">
+          <span className="text-[10px] uppercase tracking-wider text-[#6b7280] font-medium block">Productos Relevados</span>
+          <span className="text-2xl font-semibold text-[#e2e5eb] tabular-nums mt-1 block">{ranking.length}</span>
+          <span className="text-[11px] text-[#8d94a1] mt-0.5 block">Canasta representativa</span>
         </div>
 
-        <div className="p-6 rounded-3xl bg-slate-900/70 border border-emerald-500/30 shadow-xl backdrop-blur-xl relative overflow-hidden">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Ahorro Máximo</span>
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold">
-              <TrendingDown className="w-5 h-5" />
-            </div>
-          </div>
-          <p className="text-3xl font-black text-emerald-400 mt-3 tabular-nums">Hasta {maxAhorro}%</p>
-          <p className="text-xs text-slate-400 mt-1">Diferencia entre el comercio más caro y el más barato</p>
+        <div className="p-4 rounded-xl bg-[#171b22] border border-[#232833]">
+          <span className="text-[10px] uppercase tracking-wider text-[#8bb59b] font-medium block">Dispersión Máxima</span>
+          <span className="text-2xl font-semibold text-[#8bb59b] tabular-nums mt-1 block">{maxAhorro}%</span>
+          <span className="text-[11px] text-[#8d94a1] mt-0.5 block">Diferencia entre extremos</span>
         </div>
 
-        <div className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Criterio Oficial</span>
-            <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-bold">
-              <Award className="w-5 h-5" />
-            </div>
-          </div>
-          <p className="text-xl font-bold text-white mt-3">Comercio Justo</p>
-          <p className="text-xs text-slate-400 mt-1">Precios reportados directamente por cada negocio</p>
+        <div className="p-4 rounded-xl bg-[#171b22] border border-[#232833]">
+          <span className="text-[10px] uppercase tracking-wider text-[#6b7280] font-medium block">Metodología</span>
+          <span className="text-sm font-semibold text-[#e2e5eb] mt-1 block">Datos Verificados</span>
+          <span className="text-[11px] text-[#8d94a1] mt-0.5 block">Declarados por comercios</span>
+        </div>
+
+        <div className="p-4 rounded-xl bg-[#171b22] border border-[#232833]">
+          <span className="text-[10px] uppercase tracking-wider text-[#6b7280] font-medium block">Jurisdicción</span>
+          <span className="text-sm font-semibold text-[#c8cdd6] mt-1 block">Bahía Blanca</span>
+          <span className="text-[11px] text-[#8d94a1] mt-0.5 block">Zona Urbana y Periférica</span>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="p-5 rounded-3xl bg-slate-900/80 border border-white/10 mb-8 backdrop-blur-xl shadow-xl space-y-4">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-          {/* Search */}
+      {/* Filter and Query Console */}
+      <div className="p-4 rounded-2xl bg-[#171b22] border border-[#232833] space-y-3">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6b7280]" />
             <input
               type="text"
-              placeholder="Filtrar por nombre de producto (ej. Leche, Pan, Café)..."
+              placeholder="Buscar por denominación de producto (ej. Leche, Pan, Harina)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-white/10 rounded-2xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+              className="w-full pl-9 pr-3 py-2 bg-[#12151b] border border-[#232833] rounded-xl text-xs text-[#e2e5eb] placeholder:text-[#5f6674] focus:outline-none focus:border-[#384354]"
             />
           </div>
 
-          {/* Sort Selector */}
-          <div className="flex items-center space-x-2">
-            <ArrowUpDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
+          <div className="flex items-center space-x-2 text-xs">
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#6b7280] flex-shrink-0" />
             <select
               value={sortBy}
               onChange={(e: any) => setSortBy(e.target.value)}
-              className="bg-slate-950/80 border border-white/10 rounded-2xl px-3 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
+              className="bg-[#12151b] border border-[#232833] rounded-xl px-3 py-2 text-xs text-[#c8cdd6] focus:outline-none focus:border-[#384354]"
             >
-              <option value="ahorro">Mayor porcentaje de ahorro</option>
-              <option value="precio">Precio mínimo más bajo</option>
-              <option value="nombre">Orden alfabético A-Z</option>
+              <option value="ahorro">Mayor ahorro potencial (%)</option>
+              <option value="precio">Precio mínimo más bajo ($)</option>
+              <option value="nombre">Denominación A-Z</option>
             </select>
           </div>
         </div>
 
-        {/* Category Pills */}
+        {/* Category Filter Pills */}
         {categorias.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
-            <span className="text-xs text-slate-400 font-semibold mr-1">Categoría:</span>
+          <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[#232833]">
+            <span className="text-[11px] text-[#6b7280] mr-1">Rubro:</span>
             <button
               onClick={() => setSelectedCategoria('todas')}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                 selectedCategoria === 'todas'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white/5 text-slate-400 hover:text-white'
+                  ? 'bg-[#252c38] text-[#e2e5eb] border border-[#374254]'
+                  : 'bg-[#12151b] text-[#8d94a1] hover:text-[#d5d9e0] border border-[#232833]'
               }`}
             >
-              Todas ({ranking.length})
+              Todos ({ranking.length})
             </button>
             {categorias.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategoria(cat)}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors capitalize ${
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors capitalize ${
                   selectedCategoria === cat
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white/5 text-slate-400 hover:text-white'
+                    ? 'bg-[#252c38] text-[#e2e5eb] border border-[#374254]'
+                    : 'bg-[#12151b] text-[#8d94a1] hover:text-[#d5d9e0] border border-[#232833]'
                 }`}
               >
                 {cat}
@@ -259,137 +245,125 @@ export default function RankingPage() {
         )}
       </div>
 
-      {/* Chart View (Recharts) */}
+      {/* Chart View (Muted, Non-Neon Recharts) */}
       {viewMode === 'chart' && (
-        <div className="p-8 rounded-3xl bg-slate-900/80 border border-white/10 mb-8 shadow-2xl backdrop-blur-xl">
-          <div className="mb-6">
-            <h3 className="text-base font-bold text-white">Dispersión Visual de Precios ($ ARS)</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Comparación directa del precio mínimo vs precio promedio vs precio máximo en los productos destacados.
+        <div className="p-6 rounded-2xl bg-[#171b22] border border-[#232833]">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-[#e2e5eb]">Dispersión Comparativa ($ ARS)</h3>
+            <p className="text-xs text-[#8d94a1]">
+              Rango entre el precio más bajo detectado, el promedio del mercado local y el precio máximo registrado.
             </p>
           </div>
 
-          <div className="h-[380px] w-full">
+          <div className="h-[340px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} tickFormatter={(v) => `$${v}`} />
+              <BarChart data={chartData} margin={{ top: 15, right: 20, left: 0, bottom: 15 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#232833" />
+                <XAxis dataKey="name" stroke="#6b7280" fontSize={11} tickLine={false} />
+                <YAxis stroke="#6b7280" fontSize={11} tickLine={false} tickFormatter={(v) => `$${v}`} />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#0f172a', 
-                    borderColor: 'rgba(255,255,255,0.1)', 
-                    borderRadius: '16px',
-                    color: '#fff',
-                    fontSize: '12px'
+                    backgroundColor: '#181c24', 
+                    borderColor: '#29303c', 
+                    borderRadius: '8px',
+                    color: '#e2e5eb',
+                    fontSize: '11px'
                   }}
                   formatter={(value: any) => [`$${value}`, '']}
                 />
-                <Legend wrapperStyle={{ paddingTop: '15px' }} />
-                <Bar dataKey="Precio Mínimo" fill="#10b981" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="Precio Promedio" fill="#6366f1" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="Precio Máximo" fill="#f43f5e" radius={[8, 8, 0, 0]} />
+                <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} />
+                <Bar dataKey="Precio Mínimo" fill="#4a7c59" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Precio Promedio" fill="#4b6cb7" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Precio Máximo" fill="#8b3a4a" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       )}
 
-      {/* Cards View */}
+      {/* Cards / Matrix View */}
       {loading ? (
-        <div className="p-20 text-center text-slate-400">
-          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sm font-semibold">Procesando canasta y métricas del observatorio...</p>
+        <div className="p-16 text-center text-[#78808f] text-xs">
+          Procesando datos del observatorio...
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="p-16 rounded-3xl bg-slate-900/50 border border-white/5 text-center text-slate-400">
-          <Search className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-          <p className="text-base font-bold text-white">No se encontraron productos coincidentes</p>
-          <p className="text-xs text-slate-400 mt-1">Prueba con otro término de búsqueda o categoría.</p>
+        <div className="p-12 rounded-2xl bg-[#171b22] border border-[#232833] text-center text-[#8d94a1]">
+          <p className="text-sm font-semibold text-[#e2e5eb]">No se encontraron artículos</p>
+          <p className="text-xs text-[#78808f] mt-1">Modifica los términos de búsqueda o el rubro seleccionado.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filteredItems.map((item) => {
-            const diferenciaPesos = item.precioMax - item.precioMin;
-            
+            const diferencia = (item.precioMax || 0) - (item.precioMin || 0);
+
             return (
               <div
                 key={item.nombre}
-                className="p-6 rounded-3xl bg-slate-900/70 border border-white/10 hover:border-indigo-500/40 transition-all shadow-xl backdrop-blur-xl flex flex-col justify-between group"
+                className="p-5 rounded-2xl bg-[#171b22] border border-[#232833] hover:border-[#2f3745] transition-colors flex flex-col justify-between"
               >
                 <div>
-                  {/* Top Bar of Card */}
-                  <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
-                      <span className="px-2.5 py-0.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold uppercase tracking-wide">
-                        {item.categoria || 'Alimento'}
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-[#9cb1ce] bg-[#1f2633] border border-[#2d374a] px-2 py-0.5 rounded">
+                        {item.categoria || 'Canasta Básica'}
                       </span>
-                      <h3 className="text-lg font-black text-white mt-1.5 group-hover:text-indigo-300 transition-colors">
+                      <h3 className="text-base font-semibold text-[#e2e5eb] mt-1.5">
                         {item.nombre}
                       </h3>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Relevado en <strong className="text-slate-200">{item.comerciosTotal} comercios</strong> locales
+                      <p className="text-[11px] text-[#78808f] mt-0.5">
+                        {item.comerciosTotal} comercios relevados
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-black">
-                        <TrendingDown className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded bg-[#1e2a23] border border-[#2b3e34] text-[#8bb59b] text-xs font-semibold">
                         <span>Ahorro {item.ahorroPorcentaje}%</span>
                       </span>
-                      <p className="text-[10px] text-slate-400 mt-1">Ahorras hasta ${diferenciaPesos}</p>
+                      <span className="text-[10px] text-[#6b7280] block mt-1">
+                        Diferencia: ${diferencia}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Price Dispersion Meter */}
-                  <div className="my-6 p-4 rounded-2xl bg-slate-950/80 border border-white/5 space-y-2">
-                    <div className="flex justify-between items-center text-xs">
+                  {/* Spread Bar */}
+                  <div className="my-4 p-3 rounded-xl bg-[#13161c] border border-[#1f242e] space-y-2">
+                    <div className="flex justify-between items-baseline text-xs">
                       <div>
-                        <span className="text-[10px] font-bold uppercase text-emerald-400 block">Mejor Precio</span>
-                        <span className="text-xl font-black text-white tabular-nums">${item.precioMin}</span>
+                        <span className="text-[10px] uppercase text-[#8bb59b] font-medium block">Precio Mínimo</span>
+                        <span className="text-base font-semibold text-[#e2e5eb] tabular-nums">${item.precioMin}</span>
                       </div>
                       <div className="text-center">
-                        <span className="text-[10px] font-bold uppercase text-slate-400 block">Promedio</span>
-                        <span className="text-sm font-bold text-slate-300 tabular-nums">
-                          ${Math.round(item.precioPromedio)}
-                        </span>
+                        <span className="text-[10px] uppercase text-[#78808f] font-medium block">Promedio</span>
+                        <span className="text-xs font-medium text-[#c8cdd6] tabular-nums">${Math.round(item.precioPromedio)}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] font-bold uppercase text-rose-400 block">Precio Máximo</span>
-                        <span className="text-sm font-bold text-slate-400 line-through tabular-nums">
-                          ${item.precioMax}
-                        </span>
+                        <span className="text-[10px] uppercase text-[#9e7078] font-medium block">Precio Máximo</span>
+                        <span className="text-xs text-[#78808f] line-through tabular-nums">${item.precioMax}</span>
                       </div>
                     </div>
 
-                    {/* Visual Range Indicator */}
-                    <div className="relative w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                      <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-emerald-400 via-indigo-400 to-rose-400 w-full opacity-80"></div>
+                    <div className="w-full h-1.5 rounded-full bg-[#20252f] overflow-hidden">
+                      <div className="h-full bg-[#3d5a7d] w-full opacity-70"></div>
                     </div>
                   </div>
 
                   {/* Best Store Callout */}
-                  <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                        <Store className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">
-                          Comercio Recomendado
-                        </span>
-                        <p className="text-xs font-bold text-white">{item.mejorComercio.nombre}</p>
-                        {item.mejorComercio.direccion && (
-                          <p className="text-[10px] text-slate-400 truncate max-w-[200px]">
-                            {item.mejorComercio.direccion}
-                          </p>
-                        )}
-                      </div>
+                  <div className="p-3 rounded-xl bg-[#1a231d] border border-[#27382c] flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-[#8bb59b] font-medium block uppercase tracking-wider">
+                        Mejor Oferta Local
+                      </span>
+                      <p className="text-xs font-medium text-[#e2e5eb] mt-0.5">{item.mejorComercio.nombre}</p>
+                      {item.mejorComercio.direccion && (
+                        <p className="text-[10px] text-[#78808f] truncate max-w-[200px]">
+                          {item.mejorComercio.direccion}
+                        </p>
+                      )}
                     </div>
 
                     <Link
                       href={`/comercio/${item.mejorComercio._id}`}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center space-x-1"
+                      className="px-3 py-1.5 rounded-lg bg-[#243529] hover:bg-[#2e4334] text-[#8bb59b] border border-[#364f3d] text-xs font-medium transition-colors flex items-center space-x-1"
                     >
                       <span>Ver Vidriera</span>
                       <ArrowUpRight className="w-3.5 h-3.5" />
@@ -397,15 +371,15 @@ export default function RankingPage() {
                   </div>
                 </div>
 
-                {/* Other stores breakdown */}
+                {/* Other Stores List */}
                 {item.todosPrecios && item.todosPrecios.length > 1 && (
-                  <div className="mt-4 pt-4 border-t border-white/5 flex flex-wrap gap-2 text-[11px] text-slate-400">
-                    <span className="font-semibold text-slate-500">Otros comercios:</span>
+                  <div className="mt-4 pt-3 border-t border-[#232833] flex flex-wrap gap-1.5 text-[11px] text-[#78808f]">
+                    <span className="font-medium text-[#6b7280]">Otros comercios:</span>
                     {item.todosPrecios
                       .filter((c) => c.comercioId !== item.mejorComercio._id)
                       .map((p) => (
-                        <span key={p.comercioId} className="px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
-                          {p.nombreComercio}: <strong className="text-slate-300">${p.precio}</strong>
+                        <span key={p.comercioId} className="px-1.5 py-0.2 rounded bg-[#13161c] border border-[#20252f]">
+                          {p.nombreComercio}: <strong className="text-[#c8cdd6]">${p.precio}</strong>
                         </span>
                       ))}
                   </div>

@@ -12,11 +12,7 @@ import {
   Search, 
   Check, 
   X, 
-  AlertCircle,
-  TrendingDown,
-  DollarSign,
-  Tag,
-  Sparkles
+  AlertCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
@@ -92,8 +88,8 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
 
       try {
         confetti({
-          particleCount: 75,
-          spread: 60,
+          particleCount: 60,
+          spread: 50,
           origin: { y: 0.6 }
         });
       } catch {}
@@ -149,33 +145,33 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
       <div className="mb-6 flex items-center justify-between">
         <Link
           href="/panel"
-          className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors group"
+          className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8d94a1] hover:text-[#d5d9e0] transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           <span>Volver al Panel Principal</span>
         </Link>
-        <span className="text-xs text-slate-500">Gestión de Catálogo & Precios</span>
+        <span className="text-xs text-[#8d94a1]">Gestión de Catálogo & Precios</span>
       </div>
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/70 to-slate-900 border border-white/10 p-8 sm:p-10 mb-8 shadow-2xl backdrop-blur-xl">
+      <div className="rounded-2xl bg-[#171b22] border border-[#262d3a] p-8 sm:p-10 mb-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">
-              <Store className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full badge-steel text-xs font-semibold tracking-wider mb-3">
+              <Store className="w-3.5 h-3.5" />
               <span>{comercio?.nombre || 'Comercio'}</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#d5d9e0] tracking-tight">
               Catálogo de Precios
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300">
-              Los precios cargados impactan automáticamente en el Observatorio Municipal de Precios.
+            <p className="mt-2 text-xs sm:text-sm text-[#8d94a1]">
+              Los precios cargados impactan automáticamente en el Observatorio Municipal de Precios y ranking de canastas barriales.
             </p>
           </div>
 
           <button
             onClick={() => setShowModal(true)}
-            className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center space-x-2 self-start md:self-auto"
+            className="px-4 py-2.5 rounded-xl bg-[#4b6cb7] hover:bg-[#3d5a99] text-[#d5d9e0] font-semibold text-xs transition-colors flex items-center space-x-2 self-start md:self-auto"
           >
             <Plus className="w-4 h-4" />
             <span>Agregar Producto</span>
@@ -184,27 +180,27 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
       </div>
 
       {/* Search Filter */}
-      <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-xl mb-6 flex items-center justify-between">
+      <div className="p-4 rounded-xl bg-[#171b22] border border-[#262d3a] shadow-xs mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8d94a1]" />
           <input
             type="text"
             placeholder="Filtrar por nombre o rubro..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-950/80 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+            className="w-full pl-10 pr-4 py-2 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7]"
           />
         </div>
-        <span className="text-xs text-slate-400 font-bold">
+        <span className="text-xs text-[#8d94a1] font-semibold">
           {productos.length} artículos en catálogo
         </span>
       </div>
 
       {/* Catalog Table */}
-      <div className="bg-slate-900/80 rounded-3xl shadow-xl border border-white/10 overflow-hidden backdrop-blur-xl">
+      <div className="bg-[#171b22] rounded-2xl shadow-xs border border-[#262d3a] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-white/5">
-            <thead className="bg-slate-950/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          <table className="min-w-full divide-y divide-[#262d3a]">
+            <thead className="bg-[#12151b] text-[11px] font-bold text-[#8d94a1] uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4 text-left">Artículo / Producto</th>
                 <th className="px-6 py-4 text-left">Categoría</th>
@@ -213,41 +209,41 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
                 <th className="px-6 py-4 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-xs">
+            <tbody className="divide-y divide-[#262d3a] text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
+                  <td colSpan={5} className="px-6 py-12 text-center text-[#8d94a1]">
                     Cargando catálogo...
                   </td>
                 </tr>
               ) : productosFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
+                  <td colSpan={5} className="px-6 py-12 text-center text-[#8d94a1]">
                     No hay productos cargados en este comercio aún.
                   </td>
                 </tr>
               ) : (
                 productosFiltrados.map((prod) => (
-                  <tr key={prod._id} className="hover:bg-white/5 transition-colors">
+                  <tr key={prod._id} className="hover:bg-[#1d222b] transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-bold text-white text-sm">{prod.nombre}</div>
-                      <div className="text-[11px] text-slate-400 truncate max-w-xs">{prod.descripcion || 'Sin descripción'}</div>
+                      <div className="font-bold text-[#d5d9e0] text-sm">{prod.nombre}</div>
+                      <div className="text-[11px] text-[#8d94a1] truncate max-w-xs">{prod.descripcion || 'Sin descripción'}</div>
                     </td>
-                    <td className="px-6 py-4 text-slate-300 whitespace-nowrap font-medium">
-                      <span className="px-2.5 py-1 bg-white/5 border border-white/5 rounded-lg text-slate-300">
+                    <td className="px-6 py-4 text-[#8d94a1] whitespace-nowrap font-medium">
+                      <span className="px-2.5 py-1 bg-[#1d222b] border border-[#262d3a] rounded-lg text-[#d5d9e0]">
                         {prod.categoria || 'General'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-emerald-400 font-black text-base tabular-nums whitespace-nowrap">
-                      ${prod.precio}
+                    <td className="px-6 py-4 text-[#8bb59b] font-bold text-base tabular-nums whitespace-nowrap">
+                      ${prod.precio.toLocaleString('es-AR')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <button
                         onClick={() => handleToggleStock(prod)}
-                        className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider transition-all ${
+                        className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors ${
                           prod.disponible
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                            ? 'badge-sage'
+                            : 'badge-wine'
                         }`}
                       >
                         {prod.disponible ? 'Disponible' : 'Agotado'}
@@ -256,7 +252,7 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
                         onClick={() => handleEliminarProducto(prod._id, prod.nombre)}
-                        className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all"
+                        className="p-2 text-[#8d94a1] hover:text-[#d48a97] hover:bg-[#8b3a4a]/10 rounded-lg transition-colors"
                         title="Eliminar artículo"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -272,38 +268,38 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
 
       {/* Add Product Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-white/15 rounded-3xl max-w-md w-full p-8 shadow-2xl relative">
+        <div className="fixed inset-0 bg-[#0d0f14]/80 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-[#171b22] border border-[#262d3a] rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-xl relative">
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-white p-1 rounded-xl hover:bg-white/5"
+              className="absolute top-5 right-5 text-[#8d94a1] hover:text-[#d5d9e0] p-1 rounded-lg hover:bg-[#1d222b]"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="mb-6">
-              <h3 className="text-xl font-black text-white">Nuevo Artículo en Catálogo</h3>
-              <p className="text-xs text-slate-400 mt-1">
+            <div className="mb-5">
+              <h3 className="text-lg font-bold text-[#d5d9e0]">Nuevo Artículo en Catálogo</h3>
+              <p className="text-xs text-[#8d94a1] mt-1">
                 El precio ingresado se reflejará de inmediato en la canasta comparativa municipal.
               </p>
             </div>
 
             <form onSubmit={handleCrearProducto} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">Nombre del Producto *</label>
+                <label className="block text-xs font-semibold text-[#8d94a1] mb-1">Nombre del Producto *</label>
                 <input
                   type="text"
                   required
                   placeholder="ej. Leche Entera 1L"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  className="w-full p-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                  className="w-full p-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-1">Precio ($ ARS) *</label>
+                  <label className="block text-xs font-semibold text-[#8d94a1] mb-1">Precio ($ ARS) *</label>
                   <input
                     type="number"
                     step="0.01"
@@ -312,44 +308,44 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
                     placeholder="1200"
                     value={precio}
                     onChange={(e) => setPrecio(e.target.value)}
-                    className="w-full p-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 font-mono"
+                    className="w-full p-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7] font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-1">Rubro / Categoría</label>
+                  <label className="block text-xs font-semibold text-[#8d94a1] mb-1">Rubro / Categoría</label>
                   <input
                     type="text"
                     placeholder="Lácteos, Panadería..."
                     value={categoria}
                     onChange={(e) => setCategoria(e.target.value)}
-                    className="w-full p-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                    className="w-full p-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1">Descripción / Presentación</label>
+                <label className="block text-xs font-semibold text-[#8d94a1] mb-1">Descripción / Presentación</label>
                 <textarea
                   rows={2}
                   placeholder="Marca, peso neto o detalles..."
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
-                  className="w-full p-2.5 bg-slate-950 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full p-2.5 bg-[#12151b] border border-[#262d3a] rounded-xl text-xs text-[#d5d9e0] placeholder:text-[#8d94a1]/50 focus:outline-none focus:border-[#4b6cb7] resize-none"
                 />
               </div>
 
-              <div className="pt-4 flex items-center justify-end space-x-3">
+              <div className="pt-3 flex items-center justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-xs font-medium text-[#8d94a1] hover:text-[#d5d9e0]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={guardando || !nombre.trim() || !precio}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all"
+                  className="px-4 py-2 rounded-xl bg-[#4b6cb7] hover:bg-[#3d5a99] text-[#d5d9e0] font-semibold text-xs transition-colors disabled:opacity-50"
                 >
                   {guardando ? 'Guardando...' : 'Publicar Producto'}
                 </button>
