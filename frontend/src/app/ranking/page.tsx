@@ -66,7 +66,8 @@ export default function RankingPage() {
     const loadRanking = async () => {
       try {
         const data = await fetchAPI('/productos/ranking');
-        setRanking(data || []);
+        const items = Array.isArray(data) ? data : (data?.productos || []);
+        setRanking(items);
       } catch (err: any) {
         setError(err.message || 'Error cargando datos del observatorio de precios');
       } finally {
@@ -79,13 +80,16 @@ export default function RankingPage() {
 
   const categorias = useMemo(() => {
     const setCat = new Set<string>();
-    ranking.forEach((r) => {
-      if (r.categoria) setCat.add(r.categoria);
-    });
+    if (Array.isArray(ranking)) {
+      ranking.forEach((r) => {
+        if (r.categoria) setCat.add(r.categoria);
+      });
+    }
     return Array.from(setCat);
   }, [ranking]);
 
   const filteredItems = useMemo(() => {
+    if (!Array.isArray(ranking)) return [];
     return ranking
       .filter((item) => {
         const matchesName = item.nombre.toLowerCase().includes(searchTerm.toLowerCase());
@@ -93,8 +97,8 @@ export default function RankingPage() {
         return matchesName && matchesCat;
       })
       .sort((a, b) => {
-        if (sortBy === 'ahorro') return b.ahorroPorcentaje - a.ahorroPorcentaje;
-        if (sortBy === 'precio') return a.precioMin - b.precioMin;
+        if (sortBy === 'ahorro') return (b.ahorroPorcentaje || 0) - (a.ahorroPorcentaje || 0);
+        if (sortBy === 'precio') return (a.precioMin || 0) - (b.precioMin || 0);
         return a.nombre.localeCompare(b.nombre);
       });
   }, [ranking, searchTerm, selectedCategoria, sortBy]);
@@ -103,15 +107,15 @@ export default function RankingPage() {
   const chartData = useMemo(() => {
     return filteredItems.slice(0, 8).map((item) => ({
       name: item.nombre.length > 14 ? item.nombre.slice(0, 14) + '...' : item.nombre,
-      'Precio Mínimo': item.precioMin,
-      'Precio Promedio': Math.round(item.precioPromedio),
-      'Precio Máximo': item.precioMax,
+      'Precio Mínimo': item.precioMin || 0,
+      'Precio Promedio': Math.round(item.precioPromedio || 0),
+      'Precio Máximo': item.precioMax || 0,
     }));
   }, [filteredItems]);
 
   const maxAhorro = useMemo(() => {
-    if (ranking.length === 0) return 0;
-    return Math.max(...ranking.map((r) => r.ahorroPorcentaje));
+    if (!Array.isArray(ranking) || ranking.length === 0) return 0;
+    return Math.max(...ranking.map((r) => r.ahorroPorcentaje || 0));
   }, [ranking]);
 
   return (
