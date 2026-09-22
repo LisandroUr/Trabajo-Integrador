@@ -1,4 +1,3 @@
 # Trabajo-Integrador
 Integrantes:
-Rodriguez, Miqueas Eliazar
-Urdiro, Lisandro
+Rodriguez, Miqueas Eliazar - Urdiro, Lisandro
