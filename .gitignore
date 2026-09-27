@@ -49,3 +49,22 @@ yarn-error.log*
 .idea/
 *.swp
 Thumbs.db
+
+# Archivos temporales y de sistema (agentes, terminal)
+.agents
+scratch/
+waveterm_paste_*
+
+# Imagenes temporales / Screenshots
+*.png
+*.jpg
+*.jpeg
+
+.agents/
+Plan_Proyecto_Actualizado.md
+SKILL.md
+documentacion-de-entrega.md
+iniciar-proyecto.bat
+vidriera-digital-municipal*.docx
+scratch/
+backend-django/
