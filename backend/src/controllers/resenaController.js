@@ -20,7 +20,15 @@ const actualizarCalificacionComercio = async (comercioId) => {
 // Obtener reseñas públicas de un comercio
 const getResenasComercio = async (req, res) => {
   try {
-    const { comercioId } = req.params;
+    const mongoose = require('mongoose');
+    let { comercioId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(comercioId)) {
+      const words = comercioId.split('-').filter(w => w.toLowerCase() !== 'tienda' && w.trim().length > 0);
+      const searchRegex = new RegExp(words.join('.*'), 'i');
+      const c = await Comercio.findOne({ nombre: searchRegex });
+      if (c) comercioId = c._id;
+    }
+
     const resenas = await Resena.find({ comercioId, deletedAt: null })
       .populate('usuarioId', 'nombre email')
       .sort({ createdAt: -1 });

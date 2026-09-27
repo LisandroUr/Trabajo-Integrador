@@ -15,7 +15,7 @@
 * **Sistema de Diseño (Design System):** *Warm Graphite & Soft Silver* (Grafito cálido institucional `#12151b` / `#171b22` con tipografía plata suave `#d5d9e0` y acentos sobrios: Denim Municipal `#4b6cb7`, Salvia `#4a7c59`, Ocre `#b8860b`, Vino `#8b3a4a` y Acero `#7dafb5`). Cero emojis de mensajería, cero colores neón estridentes, cero blanco puro `#ffffff` ni negro puro `#000000`.
 * **Seguridad y Control de Acceso:** RBAC dinámico (Role-Based Access Control) con 4 roles base (`superadmin`, `moderador`, `comerciante`, `cliente`), tokens JWT firmados criptográficamente y hashing Bcrypt con 10 rondas de salt.
 * **Persistencia y Consultas Geoespaciales:** Base de datos NoSQL con indexación geoespacial `2dsphere` para búsquedas radiales `$near`, borrado lógico (*Soft Deletes* con campo `deletedAt`) y agregaciones analíticas de dispersión de precios.
-* **Estado de Verificación:** **100% Funcional, 14/14 pruebas automatizadas de integración superadas (100% PASS) y compilación de producción de Next.js (`npm run build`) completada con 0 errores y 13 rutas estáticas/dinámicas generadas.**
+* **Estado de Verificación:** **100% Funcional, 14/14 pruebas automatizadas de integración superadas (100% PASS) y compilación de producción de Next.js (`npm run build`) completada con 0 errores y 15 rutas estáticas/dinámicas generadas.**
 
 ---
 
@@ -43,6 +43,7 @@ La plataforma unifica en un portal cívico moderno:
 |   Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4                |
 |   - Páginas Públicas: Portada (/), Directorio (/buscar), Ranking (/ranking),      |
 |     Mapa (/mapa), Vidriera (/comercio/[id])                                       |
+|   - Portal Vecinal: Mis Consultas y Chats (/mis-consultas)                        |
 |   - Portal Comerciante: Autogestión (/panel), Catálogo (/panel/comercio/[id]),    |
 |     Bandeja Omnicanal (/panel/mensajes)                                           |
 |   - Backoffice Municipal: Control de Admisión y Moderación (/backoffice)          |

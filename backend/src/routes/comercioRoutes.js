@@ -7,6 +7,7 @@ const {
   getMisComercios,
   getComercioById, 
   createComercio, 
+  updateComercio,
   cambiarEstadoComercio, 
   deleteComercio 
 } = require('../controllers/comercioController');
@@ -26,8 +27,10 @@ router.get('/cercanos', getComerciosCercanos);
 router.get('/', getComercios);
 router.get('/:id', getComercioById);
 
-// Comerciante (Alta e inhabilitación/borrado lógico)
+// Comerciante (Alta, edición e inhabilitación/borrado lógico)
 router.post('/', protegerRuta, createComercio);
+router.put('/:id', protegerRuta, updateComercio);
+router.patch('/:id', protegerRuta, updateComercio);
 router.delete('/:id', protegerRuta, deleteComercio);
 
 module.exports = router;

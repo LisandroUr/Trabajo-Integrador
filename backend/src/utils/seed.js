@@ -55,12 +55,12 @@ const seedDatabase = async () => {
       },
       {
         nombre: 'comerciante',
-        descripcion: 'Dueño de comercio que gestiona sus vidrieras y catálogo',
+        descripcion: 'Dueño de comercio o prestador de servicios que gestiona su vidriera y catálogo',
         permisos: ['gestionar_vidriera', 'gestionar_productos', 'responder_chat', 'responder_resenas']
       },
       {
         nombre: 'cliente',
-        descripcion: 'Vecino o usuario general que busca, compara y chatea',
+        descripcion: 'Vecino o usuario general que busca, califica y consulta',
         permisos: ['ver_vidriera', 'iniciar_chat', 'crear_resena', 'guardar_favoritos']
       }
     ];
@@ -68,26 +68,28 @@ const seedDatabase = async () => {
     const rolMap = {};
     rolesCreados.forEach(r => { rolMap[r.nombre] = r._id; });
 
-    // 3. Crear Categorías
-    console.log('Creando categorías comerciales...');
+    // 3. Crear Categorías Reales
+    console.log('Creando categorías...');
     const categoriasData = [
-      { nombre: 'Alimentos y Bebidas', icono: 'Utensils' },
-      { nombre: 'Supermercado y Almacén', icono: 'ShoppingBag' },
-      { nombre: 'Farmacia y Salud', icono: 'HeartPulse' },
-      { nombre: 'Ferretería y Hogar', icono: 'Wrench' },
-      { nombre: 'Indumentaria y Calzado', icono: 'Shirt' }
+      { nombre: 'Celulares y Tecnología', icono: 'Smartphone' },
+      { nombre: 'Audio y Sonido', icono: 'Headphones' },
+      { nombre: 'Indumentaria y Calzado', icono: 'Shirt' },
+      { nombre: 'Hogar y Bazar', icono: 'Coffee' },
+      { nombre: 'Servicios Eléctricos', icono: 'Zap' },
+      { nombre: 'Plomería y Gas', icono: 'Wrench' },
+      { nombre: 'Soporte Técnico PC', icono: 'Cpu' }
     ];
     const categoriasCreadas = await Categoria.insertMany(categoriasData);
     const catMap = {};
     categoriasCreadas.forEach(c => { catMap[c.nombre] = c._id; });
 
-    // 4. Crear Contraseñas Hasheadas
+    // 4. Hash genérico de contraseñas
     const passwordGenerica = await bcrypt.hash('123456', 10);
 
     // 5. Crear Usuarios y Perfiles
-    console.log('Creando usuarios y perfiles iniciales...');
+    console.log('Creando usuarios y perfiles...');
 
-    // Admin Municipal
+    // A) Administrador Municipal (Backoffice)
     const adminUser = await Usuario.create({
       nombre: 'Lic. Mariano Valenzuela (Admin)',
       email: 'admin@vidriera.gob.ar',
@@ -96,50 +98,63 @@ const seedDatabase = async () => {
     });
     await PerfilAdminMunicipal.create({
       usuarioId: adminUser._id,
-      cargo: 'Director de Modernización y Comercio Local',
+      cargo: 'Director General de Fiscalización y Comercio',
       area: 'Secretaría de Desarrollo Productivo'
     });
 
-    // Comerciante 1: Panadería
-    const panaderoUser = await Usuario.create({
-      nombre: 'Roberto Rossi',
-      email: 'panaderia@comercio.com',
+    // B) Dueño de Local Comercial: Javier Fernández (Tech Store Palermo)
+    const localUser = await Usuario.create({
+      nombre: 'Javier Fernández',
+      email: 'techstore@palermo.com',
       password: passwordGenerica,
       roles: [rolMap['comerciante']]
     });
-    const perfilPanadero = await PerfilComerciante.create({
-      usuarioId: panaderoUser._id,
-      cuit: '20-28492019-3',
-      razonSocial: 'Rossi Roberto Panificados SA'
+    const perfilLocal = await PerfilComerciante.create({
+      usuarioId: localUser._id,
+      cuit: '20-33445566-7',
+      razonSocial: 'Tecnología Palermo S.A.'
     });
 
-    // Comerciante 2: Supermercado
-    const superUser = await Usuario.create({
-      nombre: 'Laura Morales',
-      email: 'super@comercio.com',
+    // C) Prestador de Servicios: Carlos Mendonça (Electricista Matriculado)
+    const electricistaUser = await Usuario.create({
+      nombre: 'Carlos Mendonça (Electricista)',
+      email: 'electricista@servicios.com',
       password: passwordGenerica,
       roles: [rolMap['comerciante']]
     });
-    const perfilSuper = await PerfilComerciante.create({
-      usuarioId: superUser._id,
-      cuit: '30-67291048-8',
-      razonSocial: 'Supermercado El Sol SRL'
+    const perfilElectricista = await PerfilComerciante.create({
+      usuarioId: electricistaUser._id,
+      cuit: '20-27891234-5',
+      razonSocial: 'Mendonça Servicios Eléctricos Integrales'
     });
 
-    // Comerciante 3: Farmacia
-    const farmaciaUser = await Usuario.create({
-      nombre: 'Farm. Carlos Gómez',
-      email: 'farmacia@comercio.com',
+    // D) Prestador de Servicios: Horacio Benítez (Plomería y Gas)
+    const plomeroUser = await Usuario.create({
+      nombre: 'Horacio Benítez (Sanitarios del Sol)',
+      email: 'plomeria@servicios.com',
       password: passwordGenerica,
       roles: [rolMap['comerciante']]
     });
-    const perfilFarmacia = await PerfilComerciante.create({
-      usuarioId: farmaciaUser._id,
-      cuit: '23-31984210-9',
-      razonSocial: 'Farmacia San Martín Scs'
+    const perfilPlomero = await PerfilComerciante.create({
+      usuarioId: plomeroUser._id,
+      cuit: '20-21345678-9',
+      razonSocial: 'Sanitarios del Sol Instalaciones'
     });
 
-    // Vecino / Cliente 1
+    // E) Prestador de Servicios: Marcos Vega (Servicio Técnico PC)
+    const pcUser = await Usuario.create({
+      nombre: 'Marcos Vega (Laboratorio PC)',
+      email: 'soporte@laboratoriopc.com',
+      password: passwordGenerica,
+      roles: [rolMap['comerciante']]
+    });
+    const perfilPC = await PerfilComerciante.create({
+      usuarioId: pcUser._id,
+      cuit: '20-31892345-1',
+      razonSocial: 'Laboratorio Digital PC SRL'
+    });
+
+    // F) Clientes Vecinos
     const cliente1 = await Usuario.create({
       nombre: 'Martín Benítez (Vecino)',
       email: 'vecino@ciudad.com',
@@ -148,10 +163,9 @@ const seedDatabase = async () => {
     });
     await PerfilCliente.create({
       usuarioId: cliente1._id,
-      direccionPredeterminada: 'Calle San Martín 450'
+      direccionPredeterminada: 'Av. Santa Fe 3400, Palermo'
     });
 
-    // Vecino / Cliente 2
     const cliente2 = await Usuario.create({
       nombre: 'Sofía Álvarez (Vecina)',
       email: 'sofia@ciudad.com',
@@ -160,328 +174,380 @@ const seedDatabase = async () => {
     });
     await PerfilCliente.create({
       usuarioId: cliente2._id,
-      direccionPredeterminada: 'Av. Colón 1240'
+      direccionPredeterminada: 'Bulnes 1250, Almagro'
     });
 
-    // 6. Crear Comercios (con coordenadas geográficas en Bahía Blanca: [-62.26..., -38.71...])
-    console.log('Creando comercios geolocalizados...');
+    // 6. Crear Comercios / Vidrieras
+    console.log('Creando comercios y vidrieras reales...');
 
-    // Comercio 1: Panadería Central
-    const panaderia = await Comercio.create({
-      nombre: 'Panadería y Confitería La Central',
-      descripcion: 'Elaboración artesanal de panadería, facturas de manteca, masas finas y tortas para eventos.',
-      categorias: [catMap['Alimentos y Bebidas']],
-      direccion: 'Alsina 240, Centro',
+    // COMERCIO 1: LOCAL COMERCIAL (APROBADO / VERIFICADO)
+    const comercioLocal = await Comercio.create({
+      nombre: 'Tech Store Palermo',
+      descripcion: 'Tienda líder en telefonía móvil, audio de alta fidelidad, tecnología y accesorios con garantía oficial.',
+      categorias: [catMap['Celulares y Tecnología'], catMap['Audio y Sonido']],
+      tipo: 'producto',
+      direccion: 'Av. Santa Fe 3240, Palermo, CABA',
       ubicacion: {
         type: 'Point',
-        coordinates: [-62.2642, -38.7183] // [lng, lat]
+        coordinates: [-58.4115, -34.5875]
       },
       contacto: {
-        telefono: '0291-4521122',
-        whatsapp: '+5492914521122',
-        email: 'ventas@panaderialacentral.com'
+        telefono: '011-4822-9900',
+        whatsapp: '+5491148229900',
+        email: 'ventas@techstorepalermo.com',
+        redes: ['@techstorepalermo']
       },
-      estado: 'aprobado',
+      horarios: [
+        { dia: 1, horaApertura: '09:00', horaCierre: '20:00' },
+        { dia: 2, horaApertura: '09:00', horaCierre: '20:00' },
+        { dia: 3, horaApertura: '09:00', horaCierre: '20:00' },
+        { dia: 4, horaApertura: '09:00', horaCierre: '20:00' },
+        { dia: 5, horaApertura: '09:00', horaCierre: '20:00' },
+        { dia: 6, horaApertura: '10:00', horaCierre: '18:00' }
+      ],
+      vidriera: {
+        logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80',
+        bannerPrincipal: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=1600&auto=format&fit=crop&q=80',
+        colores: ['#0284c7', '#38bdf8'],
+        galeria: [
+          'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80',
+          'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80'
+        ]
+      },
+      estado: 'aprobado', // ¡Verificado por el Administrador!
       calificacionPromedio: 4.8,
-      cantidadResenas: 2,
+      cantidadResenas: 14,
       historialEstados: [
         {
           estadoAnterior: 'pendiente',
           nuevoEstado: 'aprobado',
           adminId: adminUser._id,
-          motivo: 'Comercio habilitado municipalmente con CUIT verificado.'
+          motivo: 'Habilitación comercial aprobada e inspección técnica verificada en el backoffice.'
         }
       ]
     });
-    perfilPanadero.comerciosIds.push(panaderia._id);
-    await perfilPanadero.save();
+    perfilLocal.comerciosIds.push(comercioLocal._id);
+    await perfilLocal.save();
 
-    // Comercio 2: Supermercado El Sol
-    const supermercado = await Comercio.create({
-      nombre: 'Supermercado El Sol',
-      descripcion: 'Gran surtido en comestibles, lácteos, carnes seleccionadas, perfumería y limpieza con los mejores precios de la ciudad.',
-      categorias: [catMap['Supermercado y Almacén'], catMap['Alimentos y Bebidas']],
-      direccion: 'Brown 580',
+    // COMERCIO 2: PRESTADOR DE SERVICIOS (PENDIENTE DE VERIFICACIÓN)
+    // Figura en la plataforma inmediatamente pero sin el verificado hasta que el admin actúe
+    const servicioElectricista = await Comercio.create({
+      nombre: 'ElectroServicios CABA - Electricista Matriculado 24hs',
+      descripcion: 'Servicio profesional de electricidad domiciliaria, comercial e industrial. Urgencias las 24 horas, certificados DCI para Edenor/Edesur, recableados y tableros con disyuntor.',
+      categorias: [catMap['Servicios Eléctricos']],
+      tipo: 'servicio',
+      direccion: 'Av. Corrientes 4520, Almagro, CABA',
       ubicacion: {
         type: 'Point',
-        coordinates: [-62.2685, -38.7215]
+        coordinates: [-58.4285, -34.6045]
       },
       contacto: {
-        telefono: '0291-4567890',
-        whatsapp: '+5492914567890',
-        email: 'info@superelsol.com.ar'
+        telefono: '011-4861-3322',
+        whatsapp: '+5491148613322',
+        email: 'urgencias@electroservicioscaba.com',
+        redes: ['@electroservicioscaba']
       },
-      estado: 'aprobado',
-      calificacionPromedio: 4.5,
-      cantidadResenas: 1,
-      historialEstados: [
-        {
-          estadoAnterior: 'pendiente',
-          nuevoEstado: 'aprobado',
-          adminId: adminUser._id,
-          motivo: 'Documentación comercial en regla.'
-        }
-      ]
-    });
-    perfilSuper.comerciosIds.push(supermercado._id);
-    await perfilSuper.save();
-
-    // Comercio 3: Farmacia San Martín
-    const farmacia = await Comercio.create({
-      nombre: 'Farmacia San Martín',
-      descripcion: 'Medicamentos, perfumería, dermocosmética, atención a todas las obras sociales y prepagas. Turnos rotativos.',
-      categorias: [catMap['Farmacia y Salud']],
-      direccion: 'Av. Alem 890',
-      ubicacion: {
-        type: 'Point',
-        coordinates: [-62.2570, -38.7120]
+      horarios: [
+        { dia: 0, horaApertura: '00:00', horaCierre: '23:59' },
+        { dia: 1, horaApertura: '00:00', horaCierre: '23:59' },
+        { dia: 2, horaApertura: '00:00', horaCierre: '23:59' },
+        { dia: 3, horaApertura: '00:00', horaCierre: '23:59' },
+        { dia: 4, horaApertura: '00:00', horaCierre: '23:59' },
+        { dia: 5, horaApertura: '00:00', horaCierre: '23:59' },
+        { dia: 6, horaApertura: '00:00', horaCierre: '23:59' }
+      ],
+      vidriera: {
+        logo: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=200&auto=format&fit=crop&q=80',
+        bannerPrincipal: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1600&auto=format&fit=crop&q=80',
+        colores: ['#0284c7', '#38bdf8'],
+        galeria: [
+          'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80'
+        ]
       },
-      contacto: {
-        telefono: '0291-4554321',
-        whatsapp: '+5492914554321',
-        email: 'contacto@farmaciasanmartin.com'
-      },
-      estado: 'aprobado',
-      calificacionPromedio: 5.0,
-      cantidadResenas: 1,
-      historialEstados: [
-        {
-          estadoAnterior: 'pendiente',
-          nuevoEstado: 'aprobado',
-          adminId: adminUser._id,
-          motivo: 'Matrícula farmacéutica validada.'
-        }
-      ]
-    });
-    perfilFarmacia.comerciosIds.push(farmacia._id);
-    await perfilFarmacia.save();
-
-    // Comercio 4: Almacén Don Pepe (de SuperUser como 2da tienda)
-    const donPepe = await Comercio.create({
-      nombre: 'Almacén Don Pepe',
-      descripcion: 'Tu almacén de barrio con fiambres de primera calidad, bebidas frías, pan del día y productos secos.',
-      categorias: [catMap['Supermercado y Almacén'], catMap['Alimentos y Bebidas']],
-      direccion: 'Zapiola 610',
-      ubicacion: {
-        type: 'Point',
-        coordinates: [-62.2610, -38.7155]
-      },
-      contacto: {
-        telefono: '0291-4512399',
-        whatsapp: '+5492914512399',
-        email: 'almacendonpepe@gmail.com'
-      },
-      estado: 'aprobado',
-      calificacionPromedio: 4.2,
-      cantidadResenas: 1
-    });
-    perfilSuper.comerciosIds.push(donPepe._id);
-    await perfilSuper.save();
-
-    // Comercio 5: Tienda pendiente de moderación
-    const tiendaPendiente = await Comercio.create({
-      nombre: 'Verdulería & Frutería La Estación',
-      descripcion: 'Frutas y verduras frescas directo del mercado concentrador.',
-      categorias: [catMap['Alimentos y Bebidas']],
-      direccion: 'Donado 1150',
-      ubicacion: {
-        type: 'Point',
-        coordinates: [-62.2710, -38.7280]
-      },
-      contacto: { telefono: '0291-4588991' },
-      estado: 'pendiente',
+      estado: 'pendiente', // ¡PENDIENTE! Figura en la web pero sin verificación hasta que admin actúe
+      calificacionPromedio: 4.9,
+      cantidadResenas: 9,
       historialEstados: [
         {
           nuevoEstado: 'pendiente',
-          motivo: 'Solicitud web enviada por comerciante.'
+          motivo: 'Registro inicial efectuado por el profesional en la plataforma.'
         }
       ]
     });
+    perfilElectricista.comerciosIds.push(servicioElectricista._id);
+    await perfilElectricista.save();
 
-    // 7. Crear Productos (Especialmente diseñados para comparar precios en el Ranking)
-    console.log('Creando productos con precios comparables para el ranking...');
-    const productosData = [
-      // Leche
+    // COMERCIO 3: PRESTADOR DE SERVICIOS (APROBADO)
+    const servicioPlomero = await Comercio.create({
+      nombre: 'Sanitarios del Sol - Plomería y Gasista Certificado',
+      descripcion: 'Especialistas en instalaciones sanitarias, detección de fugas de gas, destapaciones cloacales con máquina rotativa y colocación de termotanques.',
+      categorias: [catMap['Plomería y Gas']],
+      tipo: 'servicio',
+      direccion: 'Av. Las Heras 2310, Recoleta, CABA',
+      ubicacion: {
+        type: 'Point',
+        coordinates: [-58.3965, -34.5880]
+      },
+      contacto: {
+        telefono: '011-4805-7766',
+        whatsapp: '+5491148057766',
+        email: 'info@sanitariosdelsol.com.ar',
+        redes: ['@sanitariosdelsol']
+      },
+      vidriera: {
+        logo: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&auto=format&fit=crop&q=80',
+        bannerPrincipal: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1600&auto=format&fit=crop&q=80',
+        colores: ['#0284c7', '#38bdf8']
+      },
+      estado: 'aprobado',
+      calificacionPromedio: 4.9,
+      cantidadResenas: 11,
+      historialEstados: [
+        {
+          estadoAnterior: 'pendiente',
+          nuevoEstado: 'aprobado',
+          adminId: adminUser._id,
+          motivo: 'Matrícula de gasista y técnico sanitario verificada en Backoffice.'
+        }
+      ]
+    });
+    perfilPlomero.comerciosIds.push(servicioPlomero._id);
+    await perfilPlomero.save();
+
+    // COMERCIO 4: PRESTADOR DE SERVICIOS (APROBADO) - SOPORTE TÉCNICO PC
+    const servicioPC = await Comercio.create({
+      nombre: 'Laboratorio Digital PC - Reparación & Mantenimiento',
+      descripcion: 'Laboratorio especializado en mantenimiento preventivo, cambio de pantallas, reballing, armado de computadoras gamers y recuperación de datos.',
+      categorias: [catMap['Soporte Técnico PC']],
+      tipo: 'servicio',
+      direccion: 'Av. Cabildo 2180, Belgrano, CABA',
+      ubicacion: {
+        type: 'Point',
+        coordinates: [-58.4560, -34.5610]
+      },
+      contacto: {
+        telefono: '011-4788-5522',
+        whatsapp: '+5491147885522',
+        email: 'soporte@laboratoriopc.com',
+        redes: ['@labdigitalpc']
+      },
+      vidriera: {
+        logo: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=200&auto=format&fit=crop&q=80',
+        bannerPrincipal: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&auto=format&fit=crop&q=80',
+        colores: ['#0284c7', '#38bdf8']
+      },
+      estado: 'aprobado',
+      calificacionPromedio: 4.8,
+      cantidadResenas: 8,
+      historialEstados: [
+        {
+          estadoAnterior: 'pendiente',
+          nuevoEstado: 'aprobado',
+          adminId: adminUser._id,
+          motivo: 'Inscripción comercial y habilitación de laboratorio técnico validada.'
+        }
+      ]
+    });
+    perfilPC.comerciosIds.push(servicioPC._id);
+    await perfilPC.save();
+
+    // 7. Crear Productos y Servicios Reales
+    console.log('Creando productos y servicios reales en la base de datos...');
+    const itemsData = [
+      // ==========================================
+      // PRODUCTOS (Tech Store Palermo - Aprobado)
+      // ==========================================
       {
-        nombre: 'Leche Entera Larga Vida 1L',
-        descripcion: 'Leche entera ultrapasteurizada fortificada con vitaminas A y D.',
-        precio: 1150,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: supermercado._id,
+        nombre: 'Celular Samsung Galaxy S23',
+        descripcion: 'Smartphone Samsung Galaxy S23 128GB Phantom Black con cámara de 50MP, procesador Snapdragon 8 Gen 2 y pantalla Dynamic AMOLED 2X de 120Hz.',
+        precio: 129999,
+        imagen: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Celulares y Tecnología'],
+        comercioId: comercioLocal._id,
+        tipo: 'producto',
         disponible: true
       },
       {
-        nombre: 'Leche Entera Larga Vida 1L',
-        descripcion: 'Leche de primera marca en sachet o tetrabrik 1 litro.',
-        precio: 1350,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: donPepe._id,
+        nombre: 'Marshall headphones',
+        descripcion: 'Auriculares inalámbricos Marshall Major IV Bluetooth con más de 80 horas de reproducción continua, carga inalámbrica y sonido característico Marshall.',
+        precio: 129999,
+        imagen: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Audio y Sonido'],
+        comercioId: comercioLocal._id,
+        tipo: 'producto',
         disponible: true
       },
       {
-        nombre: 'Leche Entera Larga Vida 1L',
-        descripcion: 'Leche entera premium para cafetería y venta directa.',
-        precio: 1400,
-        categoria: catMap['Alimentos y Bebidas'],
-        comercioId: panaderia._id,
+        nombre: 'Zapatillas Adidas Ultraboost',
+        descripcion: 'Zapatillas de running Adidas Ultraboost Light para hombre. Amortiguación Boost de máxima respuesta y tejido Primeknit transpirable.',
+        precio: 129999,
+        imagen: 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Indumentaria y Calzado'],
+        comercioId: comercioLocal._id,
+        tipo: 'producto',
+        disponible: true
+      },
+      {
+        nombre: 'Coffee foot maker',
+        descripcion: 'Cafetera de goteo programable con jarra de vidrio térmico de 1.5 litros, selector de intensidad de aroma y función de mantenimiento de calor.',
+        precio: 129999,
+        imagen: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Hogar y Bazar'],
+        comercioId: comercioLocal._id,
+        tipo: 'producto',
         disponible: true
       },
 
-      // Pan Francés
+      // ==========================================
+      // SERVICIOS (ElectroServicios CABA - Pendiente de Verificación)
+      // ==========================================
       {
-        nombre: 'Pan Francés Tradicional (kg)',
-        descripcion: 'Pan recién horneado, corteza crocante y miga aireada.',
-        precio: 1900,
-        categoria: catMap['Alimentos y Bebidas'],
-        comercioId: panaderia._id,
+        nombre: 'Electricista Matriculado 24hs - Guardia Urgencia',
+        descripcion: 'Instalaciones domiciliarias e industriales, resolución de cortocircuitos, restablecimiento de energía, guardias las 24 horas.',
+        precio: 25000,
+        imagen: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Servicios Eléctricos'],
+        comercioId: servicioElectricista._id,
+        tipo: 'servicio',
         disponible: true
       },
       {
-        nombre: 'Pan Francés Tradicional (kg)',
-        descripcion: 'Pan de panadería local envasado en bolsa de papel.',
-        precio: 2300,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: donPepe._id,
+        nombre: 'Certificación DCI e Informe Técnico Puesta a Tierra',
+        descripcion: 'Certificado de Aptitud Eléctrica (DCI) emitido por profesional matriculado COPIME para solicitud de nuevo medidor en Edenor y Edesur.',
+        precio: 55000,
+        imagen: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Servicios Eléctricos'],
+        comercioId: servicioElectricista._id,
+        tipo: 'servicio',
         disponible: true
       },
       {
-        nombre: 'Pan Francés Tradicional (kg)',
-        descripcion: 'Pan de producción diaria en panadería interna.',
-        precio: 2150,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: supermercado._id,
-        disponible: true
-      },
-
-      // Aceite Girasol
-      {
-        nombre: 'Aceite de Girasol 900ml',
-        descripcion: 'Aceite puro de girasol refinado 900ml sin TACC.',
-        precio: 1850,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: supermercado._id,
+        nombre: 'Instalación de Tablero Eléctrico Modular',
+        descripcion: 'Armado de tablero reglamentario con disyuntor diferencial, llaves termomagnéticas por circuito y medición de jabalina.',
+        precio: 75000,
+        imagen: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Servicios Eléctricos'],
+        comercioId: servicioElectricista._id,
+        tipo: 'servicio',
         disponible: true
       },
       {
-        nombre: 'Aceite de Girasol 900ml',
-        descripcion: 'Aceite vegetal de girasol primera marca.',
-        precio: 2100,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: donPepe._id,
-        disponible: true
-      },
-
-      // Harina 000
-      {
-        nombre: 'Harina 000 1kg',
-        descripcion: 'Harina de trigo tradicional 000 ideal para panes y masas.',
-        precio: 780,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: supermercado._id,
-        disponible: true
-      },
-      {
-        nombre: 'Harina 000 1kg',
-        descripcion: 'Harina común de trigo 1 kilo de excelente calidad.',
-        precio: 950,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: donPepe._id,
-        disponible: true
-      },
-      {
-        nombre: 'Harina 000 Especial Panadería 1kg',
-        descripcion: 'Harina con alto contenido de gluten para pastelería y panificación.',
-        precio: 850,
-        categoria: catMap['Alimentos y Bebidas'],
-        comercioId: panaderia._id,
+        nombre: 'Detección de Cortocircuitos y Fugas Eléctricas',
+        descripcion: 'Localización con instrumental digital de caídas de tensión y fugas a tierra que activan el disyuntor.',
+        precio: 32000,
+        imagen: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Servicios Eléctricos'],
+        comercioId: servicioElectricista._id,
+        tipo: 'servicio',
         disponible: true
       },
 
-      // Café Molido
+      // ==========================================
+      // SERVICIOS (Sanitarios del Sol - Aprobado / Verificado)
+      // ==========================================
       {
-        nombre: 'Café Molido Tostado 500g',
-        descripcion: 'Café tostado suave molido para cafetera de filtro.',
-        precio: 4600,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: supermercado._id,
+        nombre: 'Plomería y Gasista Certificado - Diagnóstico',
+        descripcion: 'Reparación de pérdidas de agua y gas, cambio de griferías, llaves de paso y soldaduras de plomo/termofusión.',
+        precio: 18500,
+        imagen: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Plomería y Gas'],
+        comercioId: servicioPlomero._id,
+        tipo: 'servicio',
         disponible: true
       },
       {
-        nombre: 'Café Molido Tostado 500g',
-        descripcion: 'Café clásico en paquete al vacío.',
-        precio: 5200,
-        categoria: catMap['Supermercado y Almacén'],
-        comercioId: donPepe._id,
+        nombre: 'Destapaciones Cloacales y Pluviales con Máquina',
+        descripcion: 'Desobstrucción mecánica profunda con cables rotativos de acero para cañerías de cocina, baño y pluviales.',
+        precio: 28000,
+        imagen: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Plomería y Gas'],
+        comercioId: servicioPlomero._id,
+        tipo: 'servicio',
+        disponible: true
+      },
+      {
+        nombre: 'Instalación y Service de Termotanques y Calderas',
+        descripcion: 'Montaje de artefactos a gas y eléctricos, regulación de quemadores, cambio de ánodos de magnesio y ventilaciones según norma.',
+        precio: 42000,
+        imagen: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Plomería y Gas'],
+        comercioId: servicioPlomero._id,
+        tipo: 'servicio',
         disponible: true
       },
 
-      // Farmacia
+      // ==========================================
+      // SERVICIOS (Laboratorio Digital PC - Aprobado / Verificado)
+      // ==========================================
       {
-        nombre: 'Paracetamol 500mg (20 comprimidos)',
-        descripcion: 'Analgésico y antipirético de venta libre.',
-        precio: 2400,
-        categoria: catMap['Farmacia y Salud'],
-        comercioId: farmacia._id,
+        nombre: 'Mantenimiento Preventivo y Optimización PC & Mac',
+        descripcion: 'Limpieza interna de disipadores, recambio de pasta térmica de alta conductividad, optimización de sistema y backup seguro.',
+        precio: 15000,
+        imagen: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Soporte Técnico PC'],
+        comercioId: servicioPC._id,
+        tipo: 'servicio',
         disponible: true
       },
       {
-        nombre: 'Ibuprofeno 400mg (10 cápsulas blandas)',
-        descripcion: 'Antiinflamatorio y analgésico de rápida acción.',
-        precio: 2150,
-        categoria: catMap['Farmacia y Salud'],
-        comercioId: farmacia._id,
-        disponible: true
-      },
-      {
-        nombre: 'Termómetro Digital Infrarrojo',
-        descripcion: 'Medición rápida y precisa sin contacto.',
-        precio: 12500,
-        categoria: catMap['Farmacia y Salud'],
-        comercioId: farmacia._id,
+        nombre: 'Reparación de Placa Madre y Reballing de Chipset',
+        descripcion: 'Microelectrónica de precisión para notebooks que no encienden o tienen cortos en líneas de alimentación.',
+        precio: 38000,
+        imagen: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+        categoria: catMap['Soporte Técnico PC'],
+        comercioId: servicioPC._id,
+        tipo: 'servicio',
         disponible: true
       }
     ];
-    await Producto.insertMany(productosData);
 
-    // 8. Crear Reseñas
-    console.log('Creando opiniones y valoraciones iniciales...');
+    await Producto.insertMany(itemsData);
+
+    // 8. Crear Reseñas Reales
+    console.log('Creando opiniones y valoraciones reales...');
     await Resena.create([
       {
-        comercioId: panaderia._id,
+        comercioId: comercioLocal._id,
         usuarioId: cliente1._id,
         puntaje: 5,
-        comentario: '¡Excelente panadería! Las medialunas de grasa y manteca son las mejores de Bahía. La atención es impecable.',
-        respuestaComerciante: '¡Muchísimas gracias Martín por elegirnos siempre!'
+        comentario: 'Excelente atención en Tech Store Palermo. Compré el celular y me vino con garantía oficial en el acto.',
+        respuestaComerciante: 'Muchas gracias Martín por confiar en nosotros. ¡Que disfrutes tu compra!'
       },
       {
-        comercioId: panaderia._id,
+        comercioId: comercioLocal._id,
         usuarioId: cliente2._id,
-        puntaje: 4.5,
-        comentario: 'Muy rico todo y precios súper accesibles en panadería tradicional.',
+        puntaje: 4.8,
+        comentario: 'Muy buen surtido de auriculares y tecnología. El local es impecable.',
         respuestaComerciante: null
       },
       {
-        comercioId: supermercado._id,
+        comercioId: servicioElectricista._id,
         usuarioId: cliente1._id,
-        puntaje: 4.5,
-        comentario: 'Muy buenos precios y variedad. Se nota el ahorro comparando con otros lugares.',
-        respuestaComerciante: 'Gracias por tu visita, siempre buscamos las mejores ofertas para los vecinos.'
+        puntaje: 5,
+        comentario: 'Nos quedamos sin luz un domingo a la noche y Carlos vino en 25 minutos. Resolvió el corto del tablero enseguida. Súper recomendable.',
+        respuestaComerciante: 'Gracias Martín, para eso estamos las 24 horas.'
       },
       {
-        comercioId: farmacia._id,
+        comercioId: servicioPlomero._id,
         usuarioId: cliente2._id,
+        puntaje: 4.9,
+        comentario: 'Excelente trabajo de plomería, puntual y muy prolijo.',
+        respuestaComerciante: 'Un placer atenderla Sofía.'
+      },
+      {
+        comercioId: servicioPC._id,
+        usuarioId: cliente1._id,
         puntaje: 5,
-        comentario: 'Atención profesional destacable. Me asesoraron perfectamente sobre la medicación.',
-        respuestaComerciante: 'Gracias Sofía, estamos a tu entera disposición.'
+        comentario: 'Me revivieron la notebook con el cambio de pasta térmica y limpieza. Quedó como nueva.',
+        respuestaComerciante: '¡Gracias por elegir nuestro laboratorio!'
       }
     ]);
 
-    // 9. Crear Conversación y Mensajes de Chat
-    console.log('Creando conversación de chat inicial...');
+    // 9. Conversación inicial de chat
     const conversacion = await Conversacion.create({
-      comercioId: panaderia._id,
-      participantes: [cliente1._id, panaderoUser._id],
-      ultimoMensaje: '¡Perfecto Roberto, paso a retirar a las 18hs!',
+      comercioId: comercioLocal._id,
+      participantes: [cliente1._id, localUser._id],
+      ultimoMensaje: '¡Hola! ¿Tienen stock en color Phantom Black para retirar hoy?',
       fechaUltimoMensaje: new Date()
     });
 
@@ -489,42 +555,41 @@ const seedDatabase = async () => {
       {
         conversacionId: conversacion._id,
         emisorId: cliente1._id,
-        contenido: 'Hola! ¿Tienen disponibles tortas de cumpleaños para el día de hoy?',
+        contenido: '¡Hola! ¿Tienen stock en color Phantom Black para retirar hoy?',
         leido: true,
         createdAt: new Date(Date.now() - 3600000)
       },
       {
         conversacionId: conversacion._id,
-        emisorId: panaderoUser._id,
-        contenido: 'Hola Martín! Sí, tenemos de selva negra y lemon pie recién salidas de pastelería.',
+        emisorId: localUser._id,
+        contenido: 'Hola Martín! Sí, tenemos stock inmediato en nuestra sucursal de Av. Santa Fe 3240 hasta las 20hs.',
         leido: true,
         createdAt: new Date(Date.now() - 3000000)
-      },
-      {
-        conversacionId: conversacion._id,
-        emisorId: cliente1._id,
-        contenido: '¡Perfecto Roberto, paso a retirar a las 18hs!',
-        leido: true,
-        createdAt: new Date(Date.now() - 2400000)
       }
     ]);
 
     console.log('\n======================================================');
-    console.log('>>> ¡BASE DE DATOS INICIALIZADA CON ÉXITO! <<<');
+    console.log('>>> ¡BASE DE DATOS INICIALIZADA CON DATOS REALES! <<<');
     console.log('======================================================');
-    console.log('Credenciales de acceso para demostración:');
-    console.log('1. Administrador Municipal (Backoffice):');
+    console.log('1. Administrador (Backoffice):');
     console.log('   Email:    admin@vidriera.gob.ar');
     console.log('   Password: 123456\n');
-    console.log('2. Comerciante Panadería (Panel):');
-    console.log('   Email:    panaderia@comercio.com');
+    console.log('2. Dueño de Local Comercial (Verificado):');
+    console.log('   Nombre:   Tech Store Palermo');
+    console.log('   Email:    techstore@palermo.com');
     console.log('   Password: 123456\n');
-    console.log('3. Comerciante Supermercado (Panel):');
-    console.log('   Email:    super@comercio.com');
+    console.log('3. Prestador de Servicios (Pendiente de Verificación):');
+    console.log('   Nombre:   ElectroServicios CABA - Electricista Matriculado 24hs');
+    console.log('   Email:    electricista@servicios.com');
     console.log('   Password: 123456\n');
-    console.log('4. Vecino / Cliente (Vidrieras y Chat):');
-    console.log('   Email:    vecino@ciudad.com');
-    console.log('   Password: 123456');
+    console.log('4. Prestador de Servicios (Verificado):');
+    console.log('   Nombre:   Sanitarios del Sol - Plomería y Gasista Certificado');
+    console.log('   Email:    plomeria@servicios.com');
+    console.log('   Password: 123456\n');
+    console.log('5. Prestador de Servicios (Verificado):');
+    console.log('   Nombre:   Laboratorio Digital PC - Reparación & Mantenimiento');
+    console.log('   Email:    soporte@laboratoriopc.com');
+    console.log('   Password: 123456\n');
     console.log('======================================================\n');
 
     process.exit(0);

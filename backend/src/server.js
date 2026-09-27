@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+const path = require('path');
 const socketIo = require('socket.io');
 const connectDB = require('./config/db');
 const initChatSocket = require('./sockets/chatSocket');
@@ -20,22 +21,28 @@ const io = socketIo(server, {
 
 // Middlewares globales
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Fix 19: reducido a 10mb (imágenes ya no viajan como base64)
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// Fix 19: Servir imágenes subidas como archivos estáticos públicos
+// Las URLs quedan como: http://localhost:5001/uploads/filename.jpg
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Rutas de la API
-const authRoutes = require('./routes/authRoutes');
 const categoriaRoutes = require('./routes/categoriaRoutes');
 const comercioRoutes = require('./routes/comercioRoutes');
 const productoRoutes = require('./routes/productoRoutes');
 const resenaRoutes = require('./routes/resenaRoutes');
 const conversacionRoutes = require('./routes/conversacionRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
-app.use('/api/auth', authRoutes);
+// Nota: /api/auth y endpoints principales de usuarios ahora viven en el servicio Django
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/comercios', comercioRoutes);
 app.use('/api/productos', productoRoutes);
 app.use('/api/resenas', resenaRoutes);
 app.use('/api/conversaciones', conversacionRoutes);
+app.use('/api/uploads', uploadRoutes); // Fix 19: endpoint de upload de imágenes
 
 // Ruta base de estado
 app.get('/', (req, res) => {
@@ -50,21 +57,17 @@ app.get('/', (req, res) => {
 // Inicializar sockets de chat en tiempo real
 initChatSocket(io);
 
-const DEFAULT_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5001;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5001;
 
-function startServer(portToTry) {
-  server.listen(portToTry, '0.0.0.0', () => {
-    console.log(`Servidor corriendo en el puerto ${portToTry}`);
-  });
-}
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor Express corriendo en el puerto ${PORT}`);
+});
 
 server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE' || err.code === 'EACCES') {
-    console.warn(`Puerto ocupado o bloqueado por el sistema (${err.code}). Probando puerto alternativo 5001...`);
-    startServer(5001);
+  if (err.code === 'EADDRINUSE') {
+    console.error(`ERROR FATAL: El puerto ${PORT} ya se encuentra ocupado.`);
+    process.exit(1);
   } else {
     throw err;
   }
 });
-
-startServer(DEFAULT_PORT);

@@ -13,22 +13,32 @@ export default function RegistroPage() {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [tipoUsuario, setTipoUsuario] = useState('cliente');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validación del lado del cliente para evitar caracteres especiales
+    const regexEspeciales = /[<>$%&\'"*;]/g;
+    if (regexEspeciales.test(nombre) || regexEspeciales.test(email)) {
+      setError('Por razones de seguridad, no se permiten caracteres especiales en nombre o correo.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const data = await fetchAPI('/auth/registro', {
         method: 'POST',
-        body: JSON.stringify({ nombre, email, password }),
+        body: JSON.stringify({ nombre, email, password, tipoUsuario }),
       });
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
+      window.dispatchEvent(new Event('auth-change'));
 
       try {
         confetti({
@@ -39,7 +49,11 @@ export default function RegistroPage() {
       } catch {}
 
       toast.success('Cuenta creada exitosamente');
-      router.push('/panel');
+      if (data.roles?.includes('comerciante')) {
+        router.push('/panel');
+      } else {
+        router.push('/mis-consultas'); // O a home
+      }
     } catch (err: any) {
       setError(err.message || 'Error al procesar el registro');
       toast.error('Error al registrar cuenta: ' + err.message);
@@ -53,7 +67,7 @@ export default function RegistroPage() {
       <div className="text-center mb-6">
         <h2 className="text-xl font-bold text-[#d5d9e0] tracking-tight">Crear Cuenta</h2>
         <p className="mt-1 text-xs text-[#8d94a1]">
-          Únete a la red cívica comercial y publica tus productos
+          Únete a la red cívica comercial
         </p>
       </div>
       
@@ -118,6 +132,36 @@ export default function RegistroPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[#8d94a1] uppercase tracking-wider mb-2">
+              Tipo de Cuenta
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tipoUsuario"
+                  value="cliente"
+                  checked={tipoUsuario === 'cliente'}
+                  onChange={(e) => setTipoUsuario(e.target.value)}
+                  className="w-4 h-4 text-[#4b6cb7] bg-[#12151b] border-[#262d3a] focus:ring-[#4b6cb7]"
+                />
+                <span className="text-xs text-[#d5d9e0]">Consumidor / Vecino</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tipoUsuario"
+                  value="comerciante"
+                  checked={tipoUsuario === 'comerciante'}
+                  onChange={(e) => setTipoUsuario(e.target.value)}
+                  className="w-4 h-4 text-[#4b6cb7] bg-[#12151b] border-[#262d3a] focus:ring-[#4b6cb7]"
+                />
+                <span className="text-xs text-[#d5d9e0]">Comerciante / Prestador</span>
+              </label>
             </div>
           </div>
         </div>

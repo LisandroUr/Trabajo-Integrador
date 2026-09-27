@@ -26,6 +26,11 @@ const productoSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  tipo: {
+    type: String,
+    enum: ['producto', 'servicio'],
+    default: 'producto'
+  },
   destacado: {
     type: Boolean,
     default: false

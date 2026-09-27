@@ -1,80 +1,43 @@
 @import "tailwindcss";
 
 @layer base {
-  body {
-    background-color: #12151b;
-    color: #d5d9e0;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  html {
+    color-scheme: light;
   }
 
-  /* Custom refined scrollbars - no stark contrast */
+  body {
+    background-color: #f0f6fa;
+    color: #1e293b;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #151820;
+    background: #f0f6fa;
   }
   ::-webkit-scrollbar-thumb {
-    background: #2b313d;
-    border-radius: 9999px;
+    background: #cbd5e1;
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #394150;
+    background: #94a3b8;
   }
 
   ::selection {
-    background-color: #2e3a4e;
-    color: #e6e9ee;
+    background-color: #38bdf8;
+    color: #ffffff;
   }
 }
 
-/* Warm Graphite Surface Utilities (No pure black, no pure white, no neon) */
-.surface-root {
-  background-color: #12151b;
-}
-
-.surface-base {
-  background-color: #171b22;
-  border: 1px solid #232833;
-}
-
-.surface-elevated {
-  background-color: #1d222b;
-  border: 1px solid #29303c;
-}
-
-.surface-overlay {
-  background-color: #232934;
-  border: 1px solid #333b49;
-}
-
-.surface-hover:hover {
-  background-color: #252b36;
-  border-color: #3b4454;
-}
-
-/* Subtle, muted editorial badges */
-.badge-sage {
-  background-color: rgba(58, 92, 73, 0.22);
-  color: #8bb59b;
-  border: 1px solid rgba(74, 115, 92, 0.35);
-}
-
-.badge-ochre {
-  background-color: rgba(135, 96, 47, 0.22);
-  color: #d1ab77;
-  border: 1px solid rgba(158, 114, 58, 0.35);
-}
-
-.badge-steel {
-  background-color: rgba(68, 85, 112, 0.22);
-  color: #9cb1ce;
-  border: 1px solid rgba(82, 102, 134, 0.35);
-}
-
-.badge-wine {
-  background-color: rgba(115, 53, 67, 0.22);
-  color: #d48a97;
-  border: 1px solid rgba(138, 65, 81, 0.35);
+:root {
+  --primary-blue: #38bdf8;
+  --primary-blue-hover: #0ea5e9;
+  --bg-page: #f0f6fa;
+  --card-bg: #ffffff;
 }

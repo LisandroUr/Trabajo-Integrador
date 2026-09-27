@@ -58,6 +58,8 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
   const [categoria, setCategoria] = useState('Alimentos y Bebidas');
   const [guardando, setGuardando] = useState(false);
 
+  const router = require('next/navigation').useRouter();
+
   const loadData = async () => {
     try {
       const [comRes, prodRes] = await Promise.all([
@@ -74,8 +76,24 @@ export default function GestionCatalogoPage({ params }: { params: Promise<{ id: 
   };
 
   useEffect(() => {
+    const userStored = localStorage.getItem('user');
+    if (!userStored) {
+      router.replace('/login');
+      return;
+    }
+    try {
+      const user = JSON.parse(userStored);
+      if (!user.roles?.includes('comerciante')) {
+        toast.error('Acceso denegado: Solo comerciantes');
+        router.replace('/');
+        return;
+      }
+    } catch {
+      router.replace('/login');
+      return;
+    }
     loadData();
-  }, [comercioId]);
+  }, [comercioId, router]);
 
   const handleCrearProducto = async (e: React.FormEvent) => {
     e.preventDefault();

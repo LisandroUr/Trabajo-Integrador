@@ -10,11 +10,12 @@ export const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
   };
 
   const response = await fetch(`${API_URL}${endpoint}`, {
+    cache: 'no-store',
     ...options,
     headers,
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({ error: 'Respuesta inválida del servidor' }));
 
   if (!response.ok) {
     throw new Error(data.error || 'Ocurrió un error en la petición');

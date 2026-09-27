@@ -27,12 +27,15 @@ export default function LoginPage() {
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
+      window.dispatchEvent(new Event('auth-change'));
       toast.success(`Bienvenido de nuevo, ${data.nombre}`);
 
       if (data.roles.includes('superadmin') || data.roles.includes('moderador')) {
         router.push('/backoffice');
-      } else {
+      } else if (data.roles.includes('comerciante')) {
         router.push('/panel');
+      } else {
+        router.push('/mis-consultas');
       }
     } catch (err: any) {
       setError(err.message || 'Credenciales inválidas');

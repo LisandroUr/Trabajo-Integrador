@@ -1,7 +1,27 @@
+const jwt = require('jsonwebtoken');
 const Mensaje = require('../models/Mensaje');
 const Conversacion = require('../models/Conversacion');
 
 const initChatSocket = (io) => {
+  // Fix 2: Middleware de autenticación JWT para el socket.
+  // El cliente debe enviar el token en el handshake: io({ auth: { token } })
+  io.use((socket, next) => {
+    const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+    if (!token) {
+      // Permitir conexión sin token pero marcar como anónimo (para guests)
+      socket.userId = null;
+      return next();
+    }
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.userId = decoded.id;
+      next();
+    } catch (err) {
+      // Token inválido: rechazar conexión
+      return next(new Error('Token inválido o expirado'));
+    }
+  });
+
   io.on('connection', (socket) => {
     // Unirse a una sala específica de conversación
     socket.on('join_conversation', (conversacionId) => {
@@ -18,8 +38,14 @@ const initChatSocket = (io) => {
     // Enviar mensaje en tiempo real
     socket.on('send_message', async (data) => {
       try {
-        const { conversacionId, emisorId, contenido } = data;
-        if (!conversacionId || !emisorId || !contenido || !contenido.trim()) return;
+        const { conversacionId, contenido } = data;
+        if (!conversacionId || !contenido || !contenido.trim()) return;
+
+        // Fix 2: usar el userId del token verificado, NO el que manda el cliente
+        const emisorId = socket.userId;
+        if (!emisorId) {
+          return socket.emit('error_message', { error: 'No autorizado: token requerido para enviar mensajes' });
+        }
 
         // Persistir en MongoDB
         const nuevoMensaje = await Mensaje.create({

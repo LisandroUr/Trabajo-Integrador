@@ -12,17 +12,47 @@ const getMisConversaciones = async (req, res) => {
     const perfilComerciante = await PerfilComerciante.findOne({ usuarioId });
     const misComerciosIds = perfilComerciante ? perfilComerciante.comerciosIds : [];
 
-    const conversaciones = await Conversacion.find({
+    let conversaciones = await Conversacion.find({
       $or: [
         { participantes: usuarioId },
         { comercioId: { $in: misComerciosIds } }
       ]
     })
-      .populate('participantes', 'nombre email')
-      .populate('comercioId', 'nombre vidriera direccion')
+      .populate('participantes', 'nombre email fotoPerfil')
+      .populate('comercioId', 'nombre vidriera direccion contacto')
       .sort({ fechaUltimoMensaje: -1 });
 
-    res.json(conversaciones);
+    // Auto-heal: Eliminar conversaciones duplicadas generadas por el bug de concurrencia
+    const vistas = new Set();
+    const paraEliminar = [];
+    const conversacionesUnicas = [];
+
+    for (const c of conversaciones) {
+      // Creamos una clave única basada en el comercio y los IDs de los participantes ordenados
+      const parts = c.participantes.map(p => p._id.toString()).sort().join('_');
+      const key = `${c.comercioId?._id}_${parts}`;
+
+      if (vistas.has(key)) {
+        paraEliminar.push(c._id);
+      } else {
+        vistas.add(key);
+        conversacionesUnicas.push(c);
+      }
+    }
+
+    if (paraEliminar.length > 0) {
+      // Fix 5: Soft delete en lugar de hard delete para no perder mensajes irreversiblemente
+      await Conversacion.updateMany(
+        { _id: { $in: paraEliminar } },
+        { $set: { deletedAt: new Date() } }
+      );
+      await Mensaje.updateMany(
+        { conversacionId: { $in: paraEliminar } },
+        { $set: { deletedAt: new Date() } }
+      );
+    }
+
+    res.json(conversacionesUnicas);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -37,33 +67,37 @@ const obtenerOCrearConversacion = async (req, res) => {
     const comercio = await Comercio.findById(comercioId);
     if (!comercio) return res.status(404).json({ error: 'Comercio no encontrado' });
 
-    // Buscar si ya existe una conversación entre este cliente y este comercio
-    let conversacion = await Conversacion.findOne({
-      comercioId,
-      participantes: clienteId
-    })
-      .populate('participantes', 'nombre email')
-      .populate('comercioId', 'nombre vidriera direccion');
-
-    if (!conversacion) {
-      // Determinar el usuario comerciante dueño de la tienda
-      const perfilDueno = await PerfilComerciante.findOne({ comerciosIds: comercioId });
-      const participantes = [clienteId];
-      if (perfilDueno && perfilDueno.usuarioId && perfilDueno.usuarioId.toString() !== clienteId.toString()) {
-        participantes.push(perfilDueno.usuarioId);
-      }
-
-      conversacion = await Conversacion.create({
-        comercioId,
-        participantes,
-        ultimoMensaje: 'Conversación iniciada',
-        fechaUltimoMensaje: new Date()
-      });
-
-      conversacion = await Conversacion.findById(conversacion._id)
-        .populate('participantes', 'nombre email')
-        .populate('comercioId', 'nombre vidriera direccion');
+    // Determinar el usuario comerciante dueño de la tienda
+    const perfilDueno = await PerfilComerciante.findOne({ comerciosIds: comercioId });
+    const participantes = [clienteId];
+    if (perfilDueno && perfilDueno.usuarioId && perfilDueno.usuarioId.toString() !== clienteId.toString()) {
+      participantes.push(perfilDueno.usuarioId);
     }
+
+    // Usar findOneAndUpdate con upsert para evitar race conditions (React Strict Mode)
+    let conversacion = await Conversacion.findOneAndUpdate(
+      {
+        comercioId,
+        participantes: clienteId // El cliente siempre está en esta conversación
+      },
+      {
+        $setOnInsert: {
+          comercioId,
+          participantes,
+          ultimoMensaje: 'Conversación iniciada',
+          fechaUltimoMensaje: new Date()
+        }
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true
+      }
+    );
+    conversacion = await Conversacion.findById(conversacion._id)
+      .populate('participantes', 'nombre email fotoPerfil')
+      .populate('comercioId', 'nombre vidriera direccion contacto');
+
 
     res.status(200).json(conversacion);
   } catch (error) {
@@ -78,8 +112,8 @@ const getMensajesConversacion = async (req, res) => {
     const usuarioId = req.usuario._id;
 
     const conversacion = await Conversacion.findById(id)
-      .populate('participantes', 'nombre email')
-      .populate('comercioId', 'nombre vidriera');
+      .populate('participantes', 'nombre email fotoPerfil')
+      .populate('comercioId', 'nombre vidriera direccion contacto');
 
     if (!conversacion) return res.status(404).json({ error: 'Conversación no encontrada' });
 
@@ -90,7 +124,7 @@ const getMensajesConversacion = async (req, res) => {
     );
 
     const mensajes = await Mensaje.find({ conversacionId: id })
-      .populate('emisorId', 'nombre')
+      .populate('emisorId', 'nombre fotoPerfil')
       .sort({ createdAt: 1 });
 
     res.json({ conversacion, mensajes });
@@ -124,7 +158,7 @@ const enviarMensajeREST = async (req, res) => {
     conversacion.fechaUltimoMensaje = new Date();
     await conversacion.save();
 
-    const mensajePoblado = await Mensaje.findById(nuevoMensaje._id).populate('emisorId', 'nombre');
+    const mensajePoblado = await Mensaje.findById(nuevoMensaje._id).populate('emisorId', 'nombre fotoPerfil');
 
     res.status(201).json(mensajePoblado);
   } catch (error) {
