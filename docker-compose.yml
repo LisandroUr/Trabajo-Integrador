@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # Base de Datos Transaccional (Para Django en Fase 2)
+  postgres:
+    image: postgres:15-alpine
+    container_name: tfi_postgres
+    environment:
+      POSTGRES_DB: tfi_transaccional
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secretpassword
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Base de Datos Documental (Para Node.js)
+  mongo:
+    image: mongo:6-jammy
+    container_name: tfi_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  # Django Backend (Migración Fase 2)
+  backend-django:
+    build:
+      context: ./backend-django
+      dockerfile: Dockerfile
+    container_name: tfi_backend_django
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=tfi_secret_django_key_123
+      - DB_NAME=tfi_transaccional
+      - DB_USER=admin
+      - DB_PASSWORD=secretpassword
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    depends_on:
+      - postgres
+    restart: on-failure
+
+  # Node.js Backend (Original y Fase 3 Doc DB)
+  backend-node:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tfi_backend_node
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://mongo:27017/tfi_db
+      - JWT_SECRET=tfi_jwt_super_secret_key_123
+    depends_on:
+      - mongo
+    restart: on-failure
+
+  # AI Service (Fase 4)
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: tfi_ai_service
+    ports:
+      - "8001:8001"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8001
+    restart: on-failure
+
+  # GraphQL Gateway (Fase 5)
+  graphql-gateway:
+    build:
+      context: ./graphql-gateway
+      dockerfile: Dockerfile
+    container_name: tfi_graphql_gateway
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - REST_API_URL=http://backend-django:8000/api
+    depends_on:
+      - backend-django
+    restart: on-failure
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tfi_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend-node:5001/api
+      - NEXT_PUBLIC_GRAPHQL_URL=http://graphql-gateway:4000/graphql
+    depends_on:
+      - backend-node
+      - graphql-gateway
+    restart: on-failure
+
+volumes:
+  postgres_data:
+  mongo_data:
